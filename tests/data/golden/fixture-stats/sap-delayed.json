@@ -1,0 +1,44 @@
+{
+  "silenceThresholdSeconds": 60,
+  "files": [
+    "sap-delayed.jsonl"
+  ],
+  "events": 548,
+  "parseErrors": 0,
+  "truncated": false,
+  "firstAsOfUtc": "2026-11-04T08:00:01.997+00:00",
+  "lastAsOfUtc": "2026-11-04T10:00:00+00:00",
+  "firstReceivedUtc": "2026-11-04T08:15:18.065+00:00",
+  "lastReceivedUtc": "2026-11-04T10:15:19.234+00:00",
+  "durationSeconds": 7198.003,
+  "byType": {
+    "candle": 120,
+    "quote": 120,
+    "status": 1,
+    "trade": 307
+  },
+  "bySymbol": {
+    "*": {
+      "status": 1
+    },
+    "DE0007164600": {
+      "candle": 120,
+      "quote": 120,
+      "trade": 307
+    }
+  },
+  "bySource": {
+    "gettex": 548
+  },
+  "byQuality": {
+    "Delayed": 548
+  },
+  "byDelayedMinutes": {
+    "15": 548
+  },
+  "asOfOutOfOrder": 0,
+  "receivedOutOfOrder": 0,
+  "backfilledCandles": 0,
+  "gaps": [],
+  "errors": []
+}

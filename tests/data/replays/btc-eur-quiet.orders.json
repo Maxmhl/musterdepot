@@ -1,0 +1,222 @@
+{
+  "formatVersion": 1,
+  "scenario": "btc-eur-quiet",
+  "description": "BTC/EUR, ruhiger Markt, 30 Minuten Kraken-Echtzeit: Orderbuch-Snapshots (alle 5 Min) und -Deltas, Trades, Quotes, M1-Kerzen. Market/Limit/Stop-Limit/Notional, Stornierung, zwei Ablehnungen durch das Risiko-Gate.",
+  "replay": "btc-eur-quiet.jsonl",
+  "seed": 20261109,
+  "instruments": [
+    {
+      "symbol": "BTC/EUR",
+      "name": "Bitcoin / Euro",
+      "assetClass": "Crypto",
+      "quoteCurrency": "EUR",
+      "baseAsset": "BTC",
+      "tickSize": 0.1,
+      "quantityStep": 0.00000001,
+      "minQuantity": 0.00005,
+      "primarySource": "kraken",
+      "sourceSymbol": "BTC/EUR"
+    }
+  ],
+  "accounts": [
+    {
+      "accountId": "main",
+      "name": "Testdepot",
+      "initialCash": 100000,
+      "baseCurrency": "EUR",
+      "cryptoFees": {
+        "kind": "Percent",
+        "fixedFee": 0,
+        "makerRate": 0.0025,
+        "takerRate": 0.004,
+        "tiers": [],
+        "minFee": 0
+      },
+      "stockFees": {
+        "kind": "Fixed",
+        "fixedFee": 1,
+        "makerRate": 0,
+        "takerRate": 0,
+        "tiers": [],
+        "minFee": 0
+      }
+    }
+  ],
+  "steps": [
+    {
+      "atUtc": "2026-11-02T10:02:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "q-mkt-buy-1",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Market",
+        "quantity": 0.05,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled"
+      },
+      "note": "Market-Kauf läuft Stufe für Stufe durch das Orderbuch."
+    },
+    {
+      "atUtc": "2026-11-02T10:03:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "q-lmt-buy-1",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Limit",
+        "quantity": 0.1,
+        "limitPrice": 89398.5,
+        "timeInForce": "Gtc",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "maxFillPrice": 89398.5
+      },
+      "note": "Ruhendes Limit 5 EUR unter Markt: füllt nur, wenn ein Trade durch das Limit geht (max. 25 % des Volumens)."
+    },
+    {
+      "atUtc": "2026-11-02T10:05:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "placeOrder": {
+        "clientOrderId": "q-lmt-sell-1",
+        "symbol": "BTC/EUR",
+        "side": "Sell",
+        "type": "Limit",
+        "quantity": 0.02,
+        "limitPrice": 89407.1,
+        "timeInForce": "Gtc",
+        "strategyTag": "mean-revert",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "minFillPrice": 89407.1
+      }
+    },
+    {
+      "atUtc": "2026-11-02T10:10:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "placeOrder": {
+        "clientOrderId": "q-notional-1",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Market",
+        "notional": 1000,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled"
+      },
+      "note": "Betrag statt Stückzahl."
+    },
+    {
+      "atUtc": "2026-11-02T10:12:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "q-stoplimit-1",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "StopLimit",
+        "quantity": 0.03,
+        "limitPrice": 89415.5,
+        "stopPrice": 89410.5,
+        "timeInForce": "Gtc",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "maxFillPrice": 89415.5
+      }
+    },
+    {
+      "atUtc": "2026-11-02T10:20:00+00:00",
+      "action": "Cancel",
+      "accountId": "main",
+      "source": "Human",
+      "cancel": {
+        "clientOrderId": "q-stoplimit-1",
+        "reason": "user"
+      },
+      "note": "Storniert, falls noch offen; sonst muss die Stornierung sauber abgelehnt werden."
+    },
+    {
+      "atUtc": "2026-11-02T10:25:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "q-mkt-sell-1",
+        "symbol": "BTC/EUR",
+        "side": "Sell",
+        "type": "Market",
+        "quantity": 0.05,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled"
+      }
+    },
+    {
+      "atUtc": "2026-11-02T10:26:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "q-band-reject",
+        "symbol": "BTC/EUR",
+        "side": "Sell",
+        "type": "Limit",
+        "quantity": 0.01,
+        "limitPrice": 44713.5,
+        "timeInForce": "Gtc",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": false
+      },
+      "note": "Tippfehler: Limit 50 % unter Markt verletzt das Preisband (10 %)."
+    },
+    {
+      "atUtc": "2026-11-02T10:27:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "placeOrder": {
+        "clientOrderId": "q-maxorder-reject",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Market",
+        "quantity": 0.5,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": false
+      },
+      "note": "≈ 44.700 EUR > MaxOrderNotional 10.000 EUR: Risiko-Gate muss ablehnen."
+    }
+  ]
+}

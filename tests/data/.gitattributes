@@ -1,0 +1,4 @@
+# Testdaten immer mit LF auschecken (Golden-Vergleiche und Generator-Reproduzierbarkeit).
+*.jsonl text eol=lf
+*.json text eol=lf
+*.gz binary

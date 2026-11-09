@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  test:
+    name: Build und Tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Musterdepot.slnx
+
+      # Baut alles inkl. WPF-App (EnableWindowsTargeting); gestartet wird sie unter Linux nicht.
+      - name: Build
+        run: dotnet build Musterdepot.slnx --configuration Release --no-restore
+
+      - name: Test (alle net10.0-Testprojekte)
+        shell: bash
+        run: |
+          set -uo pipefail
+          status=0
+          for proj in tests/*/*.csproj; do
+            name=$(basename "$proj" .csproj)
+            dotnet test "$proj" --configuration Release --no-build \
+              --logger "trx;LogFileName=$name.trx" \
+              --results-directory TestResults || status=1
+          done
+          exit $status
+
+      - name: Testergebnisse hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
+
+  windows:
+    name: Build und Tests (Windows, inkl. WPF-App)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Musterdepot.slnx
+
+      - name: Build
+        run: dotnet build Musterdepot.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Musterdepot.slnx --configuration Release --no-build --logger trx --results-directory TestResults
+
+      - name: Testergebnisse hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-windows
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
