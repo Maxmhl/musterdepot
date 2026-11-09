@@ -183,6 +183,7 @@ public static partial class TradingCore
             var price = o.Side == OrderSide.Buy
                 ? Money.RoundToTick(t.Price * (1 + half), inst.TickSize, up: true)
                 : Money.RoundToTick(t.Price * (1 - half), inst.TickSize, up: false);
+            if (bound is { } b && (o.Side == OrderSide.Buy ? price > b : price < b)) return 0;
             candidates.Add(new Candidate(remaining, Money.Normalize(price), FillQuality.Synthetic, t.AsOfUtc, null));
         }
         else if (sym is not null)
