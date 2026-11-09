@@ -39,6 +39,7 @@ public sealed class TestHost : IAsyncDisposable
     public const string SettingsAi = "settings-ai";
 
     private readonly TempDb _db;
+    private bool _ownsDb = true;
 
     private TestHost(TempDb db, ServiceProvider services, FakeTradingEngine engine, FakeMarketDataHub hub, ManualClock clock, RecordingNotifier notifier)
     {
@@ -74,6 +75,7 @@ public sealed class TestHost : IAsyncDisposable
         RiskConfig? risk = null,
         TempDb? db = null)
     {
+        var ownsDb = db is null;
         db ??= new TempDb();
         var clock = new ManualClock(new DateTimeOffset(2026, 11, 9, 10, 0, 0, TimeSpan.Zero));
         var engine = new FakeTradingEngine(clock);
@@ -104,13 +106,14 @@ public sealed class TestHost : IAsyncDisposable
         if (openAccount)
             engine.Execute(new OpenAccountRequest { AccountId = Acc, Name = "Test", InitialCash = 100_000m, Risk = settings.Risk });
 
-        return new TestHost(db, sp, engine, hub, clock, notifier);
+        return new TestHost(db, sp, engine, hub, clock, notifier) { _ownsDb = ownsDb };
     }
 
     public async ValueTask DisposeAsync()
     {
         await Services.DisposeAsync();
-        _db.Dispose();
+        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+        if (_ownsDb) _db.Dispose();
     }
 
     public static PlaceOrderCommand Buy(string clientId = "ui", string? key = null, string symbol = "BTC/EUR", decimal qty = 0.1m, bool dryRun = false) => new()
