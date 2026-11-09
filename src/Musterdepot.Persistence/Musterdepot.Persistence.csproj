@@ -6,4 +6,9 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Musterdepot.Core/Musterdepot.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <!-- Anhebung wegen GHSA-2m69-gcr7-jv3q (2.1.11 aus EF Core 10.0.0) -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.14" />
+  </ItemGroup>
 </Project>

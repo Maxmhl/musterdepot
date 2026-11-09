@@ -1,13 +1,49 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Musterdepot.Core.Abstractions;
+using Musterdepot.Core.Commands;
+using Musterdepot.Core.ReadModels;
 
 namespace Musterdepot.Commands;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>Registriert ICommandBus, ITradingQueries, IReadModels, IApprovalService, IClientRegistry, IMusterdepotRuntime.</summary>
+    /// <summary>
+    /// Registriert ICommandBus, ITradingQueries, IReadModels, IApprovalService, IClientRegistry, IMusterdepotRuntime,
+    /// AlertMonitor und CommandOptions (alle als Singletons). IUserNotifier, IClock und IIdGenerator nur, falls noch
+    /// nicht registriert. ITradingEngine, IMarketDataHub und die Stores kommen aus den anderen Extensions.
+    /// </summary>
     public static IServiceCollection AddMusterdepotCommands(this IServiceCollection services)
     {
-        // TODO Workstream 3a
+        services.AddLogging();
+        services.TryAddSingleton(new CommandOptions());
+        services.TryAddSingleton<IClock>(SystemClock.Instance);
+        services.TryAddSingleton<IIdGenerator, GuidIdGenerator>();
+        services.TryAddSingleton<IUserNotifier>(NullUserNotifier.Instance);
+
+        services.TryAddSingleton<SettingsService>();
+        services.TryAddSingleton<StoreChangeNotifier>();
+        services.TryAddSingleton<ClientActivityTracker>();
+
+        services.TryAddSingleton<ClientRegistry>();
+        services.TryAddSingleton<IClientRegistry>(sp => sp.GetRequiredService<ClientRegistry>());
+
+        services.TryAddSingleton<ApprovalQueue>();
+        services.TryAddSingleton<IApprovalService>(sp => sp.GetRequiredService<ApprovalQueue>());
+
+        services.TryAddSingleton<CommandBus>();
+        services.TryAddSingleton<ICommandBus>(sp => sp.GetRequiredService<CommandBus>());
+
+        services.TryAddSingleton<TradingQueries>();
+        services.TryAddSingleton<ITradingQueries>(sp => sp.GetRequiredService<TradingQueries>());
+
+        services.TryAddSingleton<ReadModels>();
+        services.TryAddSingleton<IReadModels>(sp => sp.GetRequiredService<ReadModels>());
+
+        services.TryAddSingleton<AlertMonitor>();
+
+        services.TryAddSingleton<MusterdepotRuntime>();
+        services.TryAddSingleton<IMusterdepotRuntime>(sp => sp.GetRequiredService<MusterdepotRuntime>());
         return services;
     }
 }
