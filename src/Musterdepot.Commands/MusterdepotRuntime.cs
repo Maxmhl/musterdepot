@@ -14,7 +14,7 @@ namespace Musterdepot.Commands;
 /// Marktdaten an die Engine, abgeschlossene Kerzen in den <see cref="ICandleStore"/> (Prune einmal täglich),
 /// Uhr-Takt an die Engine, Symbole aus Watchlists, Positionen und offenen Orders abonnieren, Hub starten.
 /// </summary>
-public sealed class MusterdepotRuntime : IMusterdepotRuntime
+public sealed class MusterdepotRuntime : IMusterdepotRuntime, IDisposable
 {
     private readonly ITradingEngine _engine;
     private readonly IMarketDataHub _hub;
@@ -176,6 +176,9 @@ public sealed class MusterdepotRuntime : IMusterdepotRuntime
         _suspended = false;
         Tick();
     }
+
+    /// <summary>Synchrones Beenden (z. B. wenn der DI-Container synchron entsorgt wird).</summary>
+    public void Dispose() => Task.Run(() => DisposeAsync().AsTask()).GetAwaiter().GetResult();
 
     public async ValueTask DisposeAsync()
     {

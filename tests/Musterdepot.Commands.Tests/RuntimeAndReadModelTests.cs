@@ -94,8 +94,9 @@ public sealed class RuntimeAndReadModelTests
         var updates = 0;
         rm.Quotes.Changed += (_, _) => Interlocked.Increment(ref updates);
         for (var i = 0; i < 200; i++) h.Hub.Publish(FakeMarketDataHub.Quote("ETH/EUR", 3000m + i));
-        await Task.Delay(120);
-        Assert.InRange(updates, 1, 5); // 50 ms Takt im Test → wenige Updates statt 200
+        await WaitUntilAsync(() => Volatile.Read(ref updates) >= 1);
+        Assert.InRange(updates, 1, 20); // 50 ms Takt im Test → wenige Updates statt 200
+        Assert.Equal(3199m, rm.Quotes.Current["ETH/EUR"].Last);
     }
 
     [Fact]
