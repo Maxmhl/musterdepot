@@ -1,0 +1,118 @@
+name: Release
+
+# Tag v1.2.3 (oder v1.2.3-beta.1) pushen → Setup.exe + Updatepakete in einem GitHub Release.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version ohne v (nur Testlauf: es wird nichts hochgeladen)'
+        required: true
+        default: '0.0.0-test'
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PACK_ID: Musterdepot
+  CHANNEL: win
+  RUNTIME: win-x64
+  PUBLISH_DIR: artifacts/publish
+  RELEASE_DIR: Releases
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version bestimmen
+        shell: pwsh
+        run: |
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '${{ github.event.inputs.version }}' }
+          if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw "Ungültige Version '$version' (SemVer erwartet)" }
+          "VERSION=$version" >> $env:GITHUB_ENV
+          "PRERELEASE=$([bool]($version -match '-'))" >> $env:GITHUB_ENV
+
+      - name: Tests
+        run: dotnet test Musterdepot.slnx --configuration Release
+
+      - name: App veröffentlichen (self-contained, ReadyToRun)
+        run: >
+          dotnet publish src/Musterdepot.App/Musterdepot.App.csproj
+          --configuration Release --runtime ${{ env.RUNTIME }} --self-contained true
+          -p:PublishReadyToRun=true -p:Version=${{ env.VERSION }}
+          --output ${{ env.PUBLISH_DIR }}
+
+      # Brücken-Exe für Claude Desktop liegt neben Musterdepot.exe (gleiche Laufzeit, gleicher Ordner).
+      - name: Brücke veröffentlichen
+        run: >
+          dotnet publish src/Musterdepot.McpBridge/Musterdepot.McpBridge.csproj
+          --configuration Release --runtime ${{ env.RUNTIME }} --self-contained true
+          -p:PublishReadyToRun=true -p:Version=${{ env.VERSION }}
+          --output ${{ env.PUBLISH_DIR }}
+
+      - name: Paketinhalt prüfen
+        shell: pwsh
+        run: |
+          foreach ($exe in 'Musterdepot.exe', 'Musterdepot.McpBridge.exe') {
+            if (-not (Test-Path (Join-Path $env:PUBLISH_DIR $exe))) { throw "$exe fehlt im Publish-Ordner" }
+          }
+
+      # vpk-Version muss zur Velopack-NuGet-Version der App passen: Repository-Variable VPK_VERSION setzen.
+      - name: Velopack (vpk) installieren
+        shell: pwsh
+        run: |
+          if ($env:VPK_VERSION) { dotnet tool install -g vpk --version $env:VPK_VERSION } else { dotnet tool install -g vpk }
+        env:
+          VPK_VERSION: ${{ vars.VPK_VERSION }}
+
+      # Vorherige Version holen, damit vpk Delta-Updates erzeugen kann (beim ersten Release gibt es keine).
+      - name: Vorherige Version laden
+        if: github.ref_type == 'tag'
+        continue-on-error: true
+        run: >
+          vpk download github --repoUrl ${{ github.server_url }}/${{ github.repository }}
+          --channel ${{ env.CHANNEL }} --outputDir ${{ env.RELEASE_DIR }} --token ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup.exe und Updatepakete bauen
+        run: >
+          vpk pack --packId ${{ env.PACK_ID }} --packVersion ${{ env.VERSION }}
+          --packDir ${{ env.PUBLISH_DIR }} --mainExe Musterdepot.exe
+          --packTitle Musterdepot --packAuthors Musterdepot
+          --channel ${{ env.CHANNEL }} --outputDir ${{ env.RELEASE_DIR }}
+
+      - name: Installer als Artefakt sichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: musterdepot-${{ env.VERSION }}
+          path: ${{ env.RELEASE_DIR }}/*
+
+      - name: GitHub Release veröffentlichen
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: |
+          $vpkArgs = @('upload', 'github',
+            '--repoUrl', '${{ github.server_url }}/${{ github.repository }}',
+            '--channel', $env:CHANNEL, '--outputDir', $env:RELEASE_DIR,
+            '--tag', $env:GITHUB_REF_NAME, '--releaseName', "Musterdepot $env:VERSION",
+            '--publish', '--token', '${{ secrets.GITHUB_TOKEN }}')
+          if ($env:PRERELEASE -eq 'True') { $vpkArgs += '--pre' }
+          vpk @vpkArgs
+
+      # Optional: Claude-Desktop-Erweiterung (.mcpb), sobald WS3b das Manifest angelegt hat.
+      - name: .mcpb-Erweiterung bauen und anhängen
+        if: github.ref_type == 'tag' && hashFiles('src/Musterdepot.McpBridge/mcpb/manifest.json') != ''
+        shell: pwsh
+        run: |
+          ./build/mcpb/pack-mcpb.ps1 -Version $env:VERSION -OutputDir artifacts/mcpb
+          gh release upload $env:GITHUB_REF_NAME (Get-ChildItem artifacts/mcpb/*.mcpb).FullName --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
