@@ -74,7 +74,7 @@
         "side": "Sell",
         "type": "Stop",
         "quantity": 0.1,
-        "stopPrice": 88770,
+        "stopPrice": 88790,
         "timeInForce": "Gtc",
         "dryRun": false
       },
@@ -82,7 +82,7 @@
         "accepted": true,
         "finalStatus": "Filled",
         "executedDuringGap": true,
-        "maxFillPrice": 88770
+        "maxFillPrice": 88790
       },
       "note": "Stop wird erst durch die nachgeladenen Kerzen der Standby-Lücke ausgelöst → Fill „während Lücke ausgeführt“.",
       "effectiveClientId": "ui"
@@ -98,7 +98,7 @@
         "side": "Buy",
         "type": "Limit",
         "quantity": 0.05,
-        "limitPrice": 89082.4,
+        "limitPrice": 89088.1,
         "timeInForce": "Gtc",
         "dryRun": false
       },
@@ -155,7 +155,7 @@
         "side": "Sell",
         "type": "Stop",
         "quantity": 0.1,
-        "stopPrice": 87550,
+        "stopPrice": 87560,
         "timeInForce": "Gtc",
         "dryRun": false
       },
@@ -163,7 +163,7 @@
         "accepted": true,
         "finalStatus": "Filled",
         "executedDuringGap": false,
-        "maxFillPrice": 87350
+        "maxFillPrice": 87360
       },
       "note": "Kurssprung 10:18:30 (−420 EUR): Fill zum ersten verfügbaren Kurs, nicht zum Stop-Preis.",
       "effectiveClientId": "claude-code"

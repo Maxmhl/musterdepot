@@ -23,26 +23,12 @@ public static class RecordingReader
             : file;
         using var reader = new StreamReader(s, Encoding.UTF8);
         long lineNo = 0;
-        while (true)
+        var (pending, readError) = await ReadLineSafeAsync(reader, ct);
+        while (pending is not null)
         {
-            string? line;
-            string? readError = null;
-            try
-            {
-                line = await reader.ReadLineAsync(ct);
-            }
-            catch (Exception ex) when (ex is InvalidDataException or IOException)
-            {
-                line = null;
-                readError = $"Datei endet abgeschnitten oder ist beschädigt: {ex.Message}";
-            }
-            if (readError is not null)
-            {
-                yield return new RecordedLine(lineNo + 1, null, readError, Truncated: true);
-                yield break;
-            }
-            if (line is null) yield break;
+            var line = pending;
             lineNo++;
+            (pending, readError) = await ReadLineSafeAsync(reader, ct);
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             MarketEvent? e = null;
@@ -55,7 +41,25 @@ public static class RecordingReader
             {
                 parseError = ex.Message;
             }
-            yield return new RecordedLine(lineNo, e, parseError);
+            // Eine kaputte letzte Zeile heißt fast immer: Aufzeichnung wurde mitten im Schreiben abgebrochen.
+            bool lastLine = pending is null && readError is null;
+            yield return parseError is not null && lastLine
+                ? new RecordedLine(lineNo, null, "Letzte Zeile unvollständig (Aufzeichnung abgebrochen?): " + parseError, Truncated: true)
+                : new RecordedLine(lineNo, e, parseError);
+        }
+        if (readError is not null)
+            yield return new RecordedLine(lineNo + 1, null, readError, Truncated: true);
+    }
+
+    private static async Task<(string? Line, string? Error)> ReadLineSafeAsync(StreamReader reader, CancellationToken ct)
+    {
+        try
+        {
+            return (await reader.ReadLineAsync(ct), null);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or IOException)
+        {
+            return (null, $"Datei endet abgeschnitten oder ist beschädigt: {ex.Message}");
         }
     }
 }

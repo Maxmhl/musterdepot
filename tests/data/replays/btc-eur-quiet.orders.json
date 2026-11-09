@@ -75,13 +75,13 @@
         "side": "Buy",
         "type": "Limit",
         "quantity": 0.1,
-        "limitPrice": 89388.4,
+        "limitPrice": 89398.5,
         "timeInForce": "Gtc",
         "dryRun": false
       },
       "expect": {
         "accepted": true,
-        "maxFillPrice": 89388.4
+        "maxFillPrice": 89398.5
       },
       "note": "Ruhendes Limit 5 EUR unter Markt: füllt nur, wenn ein Trade durch das Limit geht (max. 25 % des Volumens).",
       "effectiveClientId": "ui"
@@ -98,14 +98,14 @@
         "side": "Sell",
         "type": "Limit",
         "quantity": 0.02,
-        "limitPrice": 89397.0,
+        "limitPrice": 89407.1,
         "timeInForce": "Gtc",
         "strategyTag": "mean-revert",
         "dryRun": false
       },
       "expect": {
         "accepted": true,
-        "minFillPrice": 89397.0
+        "minFillPrice": 89407.1
       },
       "effectiveClientId": "claude-code"
     },
@@ -142,14 +142,14 @@
         "side": "Buy",
         "type": "StopLimit",
         "quantity": 0.03,
-        "limitPrice": 89404.6,
-        "stopPrice": 89399.6,
+        "limitPrice": 89415.5,
+        "stopPrice": 89410.5,
         "timeInForce": "Gtc",
         "dryRun": false
       },
       "expect": {
         "accepted": true,
-        "maxFillPrice": 89404.6
+        "maxFillPrice": 89415.5
       },
       "effectiveClientId": "ui"
     },
@@ -196,7 +196,7 @@
         "side": "Sell",
         "type": "Limit",
         "quantity": 0.01,
-        "limitPrice": 44708.9,
+        "limitPrice": 44713.5,
         "timeInForce": "Gtc",
         "dryRun": false
       },

@@ -1,0 +1,59 @@
+{
+  "silenceThresholdSeconds": 60,
+  "files": [
+    "btc-eur-gap.jsonl"
+  ],
+  "events": 2356,
+  "parseErrors": 0,
+  "truncated": false,
+  "firstAsOfUtc": "2026-11-03T10:00:00+00:00",
+  "lastAsOfUtc": "2026-11-03T10:25:00.05+00:00",
+  "firstReceivedUtc": "2026-11-03T10:00:00.056+00:00",
+  "lastReceivedUtc": "2026-11-03T10:25:00.091+00:00",
+  "durationSeconds": 1500.05,
+  "byType": {
+    "book-delta": 1055,
+    "book-snapshot": 3,
+    "candle": 18,
+    "gap": 1,
+    "quote": 529,
+    "status": 4,
+    "trade": 746
+  },
+  "bySymbol": {
+    "*": {
+      "status": 4
+    },
+    "BTC/EUR": {
+      "book-delta": 1055,
+      "book-snapshot": 3,
+      "candle": 18,
+      "gap": 1,
+      "quote": 529,
+      "trade": 746
+    }
+  },
+  "bySource": {
+    "kraken": 2356
+  },
+  "byQuality": {
+    "Realtime": 2356
+  },
+  "byDelayedMinutes": {
+    "0": 2356
+  },
+  "asOfOutOfOrder": 0,
+  "receivedOutOfOrder": 0,
+  "backfilledCandles": 7,
+  "gaps": [
+    {
+      "symbol": "BTC/EUR",
+      "kind": "gap-detected",
+      "fromUtc": "2026-11-03T10:08:00+00:00",
+      "toUtc": "2026-11-03T10:15:00+00:00",
+      "seconds": 420,
+      "detail": "7 Kerzen nachgeladen"
+    }
+  ],
+  "errors": []
+}

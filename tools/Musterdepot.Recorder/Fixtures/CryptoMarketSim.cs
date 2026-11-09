@@ -47,6 +47,8 @@ internal sealed class CryptoMarketSim
     private readonly string _source;
     private readonly SortedDictionary<decimal, decimal> _bids = new();
     private readonly SortedDictionary<decimal, decimal> _asks = new();
+    /// <summary>Stufen, deren Menge seit dem letzten Buch-Update durch Trades gesunken ist.</summary>
+    private readonly HashSet<decimal> _dirtyBids = [], _dirtyAsks = [];
     private decimal _anchor;
     private DateTimeOffset _lastReceived;
     private long _tradeId;
@@ -125,8 +127,8 @@ internal sealed class CryptoMarketSim
         g = Math.Ceiling((ba + Tick) / Grid) * Grid;
         for (int k = 0; targetAsks.Count < DepthLevels; k++) targetAsks.Add(g + k * Grid);
 
-        var bidChanges = Align(_bids, targetBids, isTop: p => p == bb);
-        var askChanges = Align(_asks, targetAsks, isTop: p => p == ba);
+        var bidChanges = Align(_bids, targetBids, _dirtyBids, isTop: p => p == bb);
+        var askChanges = Align(_asks, targetAsks, _dirtyAsks, isTop: p => p == ba);
 
         if (snapshot)
         {
@@ -148,7 +150,7 @@ internal sealed class CryptoMarketSim
         }
     }
 
-    private List<OrderBookLevel> Align(SortedDictionary<decimal, decimal> side, List<decimal> target, Func<decimal, bool> isTop)
+    private List<OrderBookLevel> Align(SortedDictionary<decimal, decimal> side, List<decimal> target, HashSet<decimal> dirty, Func<decimal, bool> isTop)
     {
         var changes = new List<OrderBookLevel>();
         var targetSet = target.ToHashSet();
@@ -175,6 +177,10 @@ internal sealed class CryptoMarketSim
                 changes.Add(new OrderBookLevel(price, qty));
             }
         }
+        foreach (var price in dirty.Order())
+            if (side.TryGetValue(price, out var qty) && !changes.Any(c => c.Price == price))
+                changes.Add(new OrderBookLevel(price, qty));
+        dirty.Clear();
         return changes;
     }
 
@@ -190,6 +196,7 @@ internal sealed class CryptoMarketSim
         if (qty > cap) qty = cap;
         if (qty < 0.00001m) qty = 0.00001m;
         book[price] = Math.Max(0.00001m, Math.Round(book[price] - qty, 8));
+        (side == OrderSide.Buy ? _dirtyAsks : _dirtyBids).Add(price);
         Mid += side == OrderSide.Buy ? 0.3m : -0.3m;
 
         if (!_candleHasTrade)

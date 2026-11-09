@@ -1,0 +1,48 @@
+{
+  "silenceThresholdSeconds": 60,
+  "files": [
+    "btc-eur-quiet.jsonl"
+  ],
+  "events": 3985,
+  "parseErrors": 0,
+  "truncated": false,
+  "firstAsOfUtc": "2026-11-02T10:00:00+00:00",
+  "lastAsOfUtc": "2026-11-02T10:30:00.05+00:00",
+  "firstReceivedUtc": "2026-11-02T10:00:00.087+00:00",
+  "lastReceivedUtc": "2026-11-02T10:30:00.105+00:00",
+  "durationSeconds": 1800.05,
+  "byType": {
+    "book-delta": 1792,
+    "book-snapshot": 6,
+    "candle": 30,
+    "quote": 900,
+    "status": 1,
+    "trade": 1256
+  },
+  "bySymbol": {
+    "*": {
+      "status": 1
+    },
+    "BTC/EUR": {
+      "book-delta": 1792,
+      "book-snapshot": 6,
+      "candle": 30,
+      "quote": 900,
+      "trade": 1256
+    }
+  },
+  "bySource": {
+    "kraken": 3985
+  },
+  "byQuality": {
+    "Realtime": 3985
+  },
+  "byDelayedMinutes": {
+    "0": 3985
+  },
+  "asOfOutOfOrder": 0,
+  "receivedOutOfOrder": 0,
+  "backfilledCandles": 0,
+  "gaps": [],
+  "errors": []
+}
