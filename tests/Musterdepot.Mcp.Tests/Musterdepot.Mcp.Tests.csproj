@@ -13,6 +13,7 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
     <PackageReference Include="FsCheck.Xunit" Version="3.3.0" />
+    <PackageReference Include="ModelContextProtocol" Version="2.4.0" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

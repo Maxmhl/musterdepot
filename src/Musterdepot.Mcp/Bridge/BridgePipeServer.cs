@@ -238,7 +238,7 @@ public sealed class BridgePipeServer : IAsyncDisposable
     }
 
     /// <summary>Liest bis <c>\n</c> (ohne Zeilenende); null bei Verbindungsende.</summary>
-    internal static async Task<string?> ReadLineAsync(Stream stream, int maxBytes, CancellationToken ct)
+    public static async Task<string?> ReadLineAsync(Stream stream, int maxBytes, CancellationToken ct)
     {
         var buffer = new byte[1];
         using var ms = new MemoryStream();
