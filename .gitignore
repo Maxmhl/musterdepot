@@ -10,3 +10,4 @@ Releases/
 *.db
 *.db-shm
 *.db-wal
+.claude/
