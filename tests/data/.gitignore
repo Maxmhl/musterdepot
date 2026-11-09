@@ -1,0 +1,2 @@
+# Bei Golden-Abweichungen geschriebene Ist-Dateien
+*.actual.json

@@ -1,0 +1,153 @@
+{
+  "formatVersion": 1,
+  "scenario": "sap-delayed",
+  "description": "SAP SE (DE0007164600) über gettex, 15 Min. verzögert (Quality=Delayed), Handelstag-Ausschnitt 09:00–11:00 MEZ. Daten treffen in 15-Minuten-Dateien ein (ReceivedUtc = Veröffentlichung + Abruf). Prüft: kein Fill vor dem Ordereingang, synthetischer Spread, DAY-Orders.",
+  "replay": "sap-delayed.jsonl",
+  "seed": 20261111,
+  "instruments": [
+    {
+      "symbol": "DE0007164600",
+      "name": "SAP SE",
+      "assetClass": "Stock",
+      "quoteCurrency": "EUR",
+      "baseAsset": "DE0007164600",
+      "isin": "DE0007164600",
+      "wkn": "716460",
+      "tickSize": 0.01,
+      "quantityStep": 1,
+      "minQuantity": 1,
+      "primarySource": "gettex",
+      "sourceSymbol": "DE0007164600"
+    }
+  ],
+  "accounts": [
+    {
+      "accountId": "main",
+      "name": "Testdepot",
+      "initialCash": 100000,
+      "baseCurrency": "EUR",
+      "cryptoFees": {
+        "kind": "Percent",
+        "fixedFee": 0,
+        "makerRate": 0.0025,
+        "takerRate": 0.004,
+        "tiers": [],
+        "minFee": 0
+      },
+      "stockFees": {
+        "kind": "Fixed",
+        "fixedFee": 1,
+        "makerRate": 0,
+        "takerRate": 0,
+        "tiers": [],
+        "minFee": 0
+      }
+    }
+  ],
+  "steps": [
+    {
+      "atUtc": "2026-11-04T08:40:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "s-mkt-buy-1",
+        "symbol": "DE0007164600",
+        "side": "Buy",
+        "type": "Market",
+        "quantity": 20,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "fillQuality": "Synthetic",
+        "fillsOnlyFromMarketDataAfterUtc": "2026-11-04T08:40:00+00:00"
+      },
+      "note": "Sichtbare Kurse sind bei Ordereingang 25–40 Min. alt. Fill erst gegen einen Trade mit AsOfUtc nach 08:40 (kommt mit der Datei um ~09:00), angenommener Spread.",
+      "effectiveClientId": "ui"
+    },
+    {
+      "atUtc": "2026-11-04T08:41:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "s-lmt-buy-1",
+        "symbol": "DE0007164600",
+        "side": "Buy",
+        "type": "Limit",
+        "quantity": 30,
+        "limitPrice": 236.43,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "maxFillPrice": 236.43,
+        "fillsOnlyFromMarketDataAfterUtc": "2026-11-04T08:41:00+00:00"
+      },
+      "note": "Limit 1 EUR unter dem zuletzt sichtbaren Kurs, gültig bis Handelsschluss (DAY).",
+      "effectiveClientId": "ui"
+    },
+    {
+      "atUtc": "2026-11-04T09:05:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "placeOrder": {
+        "clientOrderId": "s-lmt-sell-1",
+        "symbol": "DE0007164600",
+        "side": "Sell",
+        "type": "Limit",
+        "quantity": 10,
+        "limitPrice": 242.10,
+        "timeInForce": "Day",
+        "strategyTag": "delayed-test",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "minFillPrice": 242.10
+      },
+      "effectiveClientId": "claude-code"
+    },
+    {
+      "atUtc": "2026-11-04T09:50:00+00:00",
+      "action": "Cancel",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "cancel": {
+        "clientOrderId": "s-lmt-sell-1",
+        "reason": "user"
+      },
+      "expect": {
+        "finalStatus": "Cancelled"
+      },
+      "effectiveClientId": "claude-code"
+    },
+    {
+      "atUtc": "2026-11-04T09:55:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "s-mkt-sell-1",
+        "symbol": "DE0007164600",
+        "side": "Sell",
+        "type": "Market",
+        "quantity": 10,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "fillsOnlyFromMarketDataAfterUtc": "2026-11-04T09:55:00+00:00"
+      },
+      "note": "Fill erst mit der letzten Datei (~10:15) gegen Trades nach 09:55.",
+      "effectiveClientId": "ui"
+    }
+  ]
+}

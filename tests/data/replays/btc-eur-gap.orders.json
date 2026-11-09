@@ -1,0 +1,172 @@
+{
+  "formatVersion": 1,
+  "scenario": "btc-eur-gap",
+  "description": "BTC/EUR mit Standby-Lücke 10:08–10:15 (GapDetected mit 7 nachgeladenen M1-Kerzen, Kurs −1.800 EUR) und Kurssprung −420 EUR um 10:18:30. Stop-Tests: Fill während der Lücke und Fill zum ersten Kurs nach dem Sprung.",
+  "replay": "btc-eur-gap.jsonl",
+  "seed": 20261110,
+  "instruments": [
+    {
+      "symbol": "BTC/EUR",
+      "name": "Bitcoin / Euro",
+      "assetClass": "Crypto",
+      "quoteCurrency": "EUR",
+      "baseAsset": "BTC",
+      "tickSize": 0.1,
+      "quantityStep": 0.00000001,
+      "minQuantity": 0.00005,
+      "primarySource": "kraken",
+      "sourceSymbol": "BTC/EUR"
+    }
+  ],
+  "accounts": [
+    {
+      "accountId": "main",
+      "name": "Testdepot",
+      "initialCash": 100000,
+      "baseCurrency": "EUR",
+      "cryptoFees": {
+        "kind": "Percent",
+        "fixedFee": 0,
+        "makerRate": 0.0025,
+        "takerRate": 0.004,
+        "tiers": [],
+        "minFee": 0
+      },
+      "stockFees": {
+        "kind": "Fixed",
+        "fixedFee": 1,
+        "makerRate": 0,
+        "takerRate": 0,
+        "tiers": [],
+        "minFee": 0
+      }
+    }
+  ],
+  "steps": [
+    {
+      "atUtc": "2026-11-03T10:01:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "g-entry-1",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Market",
+        "quantity": 0.1,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled"
+      },
+      "effectiveClientId": "ui"
+    },
+    {
+      "atUtc": "2026-11-03T10:02:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "g-stop-1",
+        "symbol": "BTC/EUR",
+        "side": "Sell",
+        "type": "Stop",
+        "quantity": 0.1,
+        "stopPrice": 88770,
+        "timeInForce": "Gtc",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled",
+        "executedDuringGap": true,
+        "maxFillPrice": 88770
+      },
+      "note": "Stop wird erst durch die nachgeladenen Kerzen der Standby-Lücke ausgelöst → Fill „während Lücke ausgeführt“.",
+      "effectiveClientId": "ui"
+    },
+    {
+      "atUtc": "2026-11-03T10:03:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Human",
+      "placeOrder": {
+        "clientOrderId": "g-lmt-cancel",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Limit",
+        "quantity": 0.05,
+        "limitPrice": 89082.4,
+        "timeInForce": "Gtc",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true
+      },
+      "effectiveClientId": "ui"
+    },
+    {
+      "atUtc": "2026-11-03T10:05:00+00:00",
+      "action": "Cancel",
+      "accountId": "main",
+      "source": "Human",
+      "cancel": {
+        "clientOrderId": "g-lmt-cancel",
+        "reason": "user"
+      },
+      "expect": {
+        "finalStatus": "Cancelled"
+      },
+      "note": "Vor der Lücke storniert – darf in der Lücke nicht mehr gefüllt werden.",
+      "effectiveClientId": "ui"
+    },
+    {
+      "atUtc": "2026-11-03T10:16:30+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "placeOrder": {
+        "clientOrderId": "g-entry-2",
+        "symbol": "BTC/EUR",
+        "side": "Buy",
+        "type": "Market",
+        "quantity": 0.1,
+        "timeInForce": "Day",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled"
+      },
+      "effectiveClientId": "claude-code"
+    },
+    {
+      "atUtc": "2026-11-03T10:17:00+00:00",
+      "action": "PlaceOrder",
+      "accountId": "main",
+      "source": "Ai",
+      "clientName": "claude-code",
+      "placeOrder": {
+        "clientOrderId": "g-stop-2",
+        "symbol": "BTC/EUR",
+        "side": "Sell",
+        "type": "Stop",
+        "quantity": 0.1,
+        "stopPrice": 87550,
+        "timeInForce": "Gtc",
+        "dryRun": false
+      },
+      "expect": {
+        "accepted": true,
+        "finalStatus": "Filled",
+        "executedDuringGap": false,
+        "maxFillPrice": 87350
+      },
+      "note": "Kurssprung 10:18:30 (−420 EUR): Fill zum ersten verfügbaren Kurs, nicht zum Stop-Preis.",
+      "effectiveClientId": "claude-code"
+    }
+  ]
+}
