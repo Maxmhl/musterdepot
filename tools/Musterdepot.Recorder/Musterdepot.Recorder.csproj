@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Musterdepot.Recorder</RootNamespace>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Musterdepot.Core/Musterdepot.Core.csproj" />
+    <ProjectReference Include="../../src/Musterdepot.MarketData/Musterdepot.MarketData.csproj" />
+  </ItemGroup>
+</Project>

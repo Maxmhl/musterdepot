@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Musterdepot.Commands</RootNamespace>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Musterdepot.Core/Musterdepot.Core.csproj" />
+    <ProjectReference Include="../../src/Musterdepot.Engine/Musterdepot.Engine.csproj" />
+    <ProjectReference Include="../../src/Musterdepot.MarketData/Musterdepot.MarketData.csproj" />
+    <ProjectReference Include="../../src/Musterdepot.Persistence/Musterdepot.Persistence.csproj" />
+  </ItemGroup>
+</Project>

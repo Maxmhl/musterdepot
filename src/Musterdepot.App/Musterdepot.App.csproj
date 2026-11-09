@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Musterdepot.App</RootNamespace>
+    <AssemblyName>Musterdepot</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Musterdepot.Core/Musterdepot.Core.csproj" />
+    <ProjectReference Include="../Musterdepot.Engine/Musterdepot.Engine.csproj" />
+    <ProjectReference Include="../Musterdepot.MarketData/Musterdepot.MarketData.csproj" />
+    <ProjectReference Include="../Musterdepot.Persistence/Musterdepot.Persistence.csproj" />
+    <ProjectReference Include="../Musterdepot.Commands/Musterdepot.Commands.csproj" />
+    <ProjectReference Include="../Musterdepot.Mcp/Musterdepot.Mcp.csproj" />
+  </ItemGroup>
+</Project>

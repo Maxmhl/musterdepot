@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Musterdepot.McpBridge</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Musterdepot.McpBridge</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Musterdepot.Core/Musterdepot.Core.csproj" />
+  </ItemGroup>
+</Project>
