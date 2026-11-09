@@ -64,8 +64,7 @@
         "fillQuality": "Synthetic",
         "fillsOnlyFromMarketDataAfterUtc": "2026-11-04T08:40:00+00:00"
       },
-      "note": "Sichtbare Kurse sind bei Ordereingang 25–40 Min. alt. Fill erst gegen einen Trade mit AsOfUtc nach 08:40 (kommt mit der Datei um ~09:00), angenommener Spread.",
-      "effectiveClientId": "ui"
+      "note": "Sichtbare Kurse sind bei Ordereingang 25–40 Min. alt. Fill erst gegen einen Trade mit AsOfUtc nach 08:40 (kommt mit der Datei um ~09:00), angenommener Spread."
     },
     {
       "atUtc": "2026-11-04T08:41:00+00:00",
@@ -87,8 +86,7 @@
         "maxFillPrice": 236.43,
         "fillsOnlyFromMarketDataAfterUtc": "2026-11-04T08:41:00+00:00"
       },
-      "note": "Limit 1 EUR unter dem zuletzt sichtbaren Kurs, gültig bis Handelsschluss (DAY).",
-      "effectiveClientId": "ui"
+      "note": "Limit 1 EUR unter dem zuletzt sichtbaren Kurs, gültig bis Handelsschluss (DAY)."
     },
     {
       "atUtc": "2026-11-04T09:05:00+00:00",
@@ -110,8 +108,7 @@
       "expect": {
         "accepted": true,
         "minFillPrice": 242.10
-      },
-      "effectiveClientId": "claude-code"
+      }
     },
     {
       "atUtc": "2026-11-04T09:50:00+00:00",
@@ -125,8 +122,7 @@
       },
       "expect": {
         "finalStatus": "Cancelled"
-      },
-      "effectiveClientId": "claude-code"
+      }
     },
     {
       "atUtc": "2026-11-04T09:55:00+00:00",
@@ -146,8 +142,7 @@
         "accepted": true,
         "fillsOnlyFromMarketDataAfterUtc": "2026-11-04T09:55:00+00:00"
       },
-      "note": "Fill erst mit der letzten Datei (~10:15) gegen Trades nach 09:55.",
-      "effectiveClientId": "ui"
+      "note": "Fill erst mit der letzten Datei (~10:15) gegen Trades nach 09:55."
     }
   ]
 }

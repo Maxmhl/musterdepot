@@ -61,8 +61,7 @@
         "accepted": true,
         "finalStatus": "Filled"
       },
-      "note": "Market-Kauf läuft Stufe für Stufe durch das Orderbuch.",
-      "effectiveClientId": "ui"
+      "note": "Market-Kauf läuft Stufe für Stufe durch das Orderbuch."
     },
     {
       "atUtc": "2026-11-02T10:03:00+00:00",
@@ -83,8 +82,7 @@
         "accepted": true,
         "maxFillPrice": 89398.5
       },
-      "note": "Ruhendes Limit 5 EUR unter Markt: füllt nur, wenn ein Trade durch das Limit geht (max. 25 % des Volumens).",
-      "effectiveClientId": "ui"
+      "note": "Ruhendes Limit 5 EUR unter Markt: füllt nur, wenn ein Trade durch das Limit geht (max. 25 % des Volumens)."
     },
     {
       "atUtc": "2026-11-02T10:05:00+00:00",
@@ -106,8 +104,7 @@
       "expect": {
         "accepted": true,
         "minFillPrice": 89407.1
-      },
-      "effectiveClientId": "claude-code"
+      }
     },
     {
       "atUtc": "2026-11-02T10:10:00+00:00",
@@ -128,8 +125,7 @@
         "accepted": true,
         "finalStatus": "Filled"
       },
-      "note": "Betrag statt Stückzahl.",
-      "effectiveClientId": "claude-code"
+      "note": "Betrag statt Stückzahl."
     },
     {
       "atUtc": "2026-11-02T10:12:00+00:00",
@@ -150,8 +146,7 @@
       "expect": {
         "accepted": true,
         "maxFillPrice": 89415.5
-      },
-      "effectiveClientId": "ui"
+      }
     },
     {
       "atUtc": "2026-11-02T10:20:00+00:00",
@@ -162,8 +157,7 @@
         "clientOrderId": "q-stoplimit-1",
         "reason": "user"
       },
-      "note": "Storniert, falls noch offen; sonst muss die Stornierung sauber abgelehnt werden.",
-      "effectiveClientId": "ui"
+      "note": "Storniert, falls noch offen; sonst muss die Stornierung sauber abgelehnt werden."
     },
     {
       "atUtc": "2026-11-02T10:25:00+00:00",
@@ -182,8 +176,7 @@
       "expect": {
         "accepted": true,
         "finalStatus": "Filled"
-      },
-      "effectiveClientId": "ui"
+      }
     },
     {
       "atUtc": "2026-11-02T10:26:00+00:00",
@@ -203,8 +196,7 @@
       "expect": {
         "accepted": false
       },
-      "note": "Tippfehler: Limit 50 % unter Markt verletzt das Preisband (10 %).",
-      "effectiveClientId": "ui"
+      "note": "Tippfehler: Limit 50 % unter Markt verletzt das Preisband (10 %)."
     },
     {
       "atUtc": "2026-11-02T10:27:00+00:00",
@@ -224,8 +216,7 @@
       "expect": {
         "accepted": false
       },
-      "note": "≈ 44.700 EUR > MaxOrderNotional 10.000 EUR: Risiko-Gate muss ablehnen.",
-      "effectiveClientId": "claude-code"
+      "note": "≈ 44.700 EUR > MaxOrderNotional 10.000 EUR: Risiko-Gate muss ablehnen."
     }
   ]
 }

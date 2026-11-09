@@ -60,8 +60,7 @@
       "expect": {
         "accepted": true,
         "finalStatus": "Filled"
-      },
-      "effectiveClientId": "ui"
+      }
     },
     {
       "atUtc": "2026-11-03T10:02:00+00:00",
@@ -84,8 +83,7 @@
         "executedDuringGap": true,
         "maxFillPrice": 88790
       },
-      "note": "Stop wird erst durch die nachgeladenen Kerzen der Standby-Lücke ausgelöst → Fill „während Lücke ausgeführt“.",
-      "effectiveClientId": "ui"
+      "note": "Stop wird erst durch die nachgeladenen Kerzen der Standby-Lücke ausgelöst → Fill „während Lücke ausgeführt“."
     },
     {
       "atUtc": "2026-11-03T10:03:00+00:00",
@@ -104,8 +102,7 @@
       },
       "expect": {
         "accepted": true
-      },
-      "effectiveClientId": "ui"
+      }
     },
     {
       "atUtc": "2026-11-03T10:05:00+00:00",
@@ -119,8 +116,7 @@
       "expect": {
         "finalStatus": "Cancelled"
       },
-      "note": "Vor der Lücke storniert – darf in der Lücke nicht mehr gefüllt werden.",
-      "effectiveClientId": "ui"
+      "note": "Vor der Lücke storniert – darf in der Lücke nicht mehr gefüllt werden."
     },
     {
       "atUtc": "2026-11-03T10:16:30+00:00",
@@ -140,8 +136,7 @@
       "expect": {
         "accepted": true,
         "finalStatus": "Filled"
-      },
-      "effectiveClientId": "claude-code"
+      }
     },
     {
       "atUtc": "2026-11-03T10:17:00+00:00",
@@ -165,8 +160,7 @@
         "executedDuringGap": false,
         "maxFillPrice": 87360
       },
-      "note": "Kurssprung 10:18:30 (−420 EUR): Fill zum ersten verfügbaren Kurs, nicht zum Stop-Preis.",
-      "effectiveClientId": "claude-code"
+      "note": "Kurssprung 10:18:30 (−420 EUR): Fill zum ersten verfügbaren Kurs, nicht zum Stop-Preis."
     }
   ]
 }

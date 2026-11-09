@@ -67,6 +67,7 @@ public sealed record OrderScriptStep
     public OrderScriptExpectation? Expect { get; init; }
     public string? Note { get; init; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public string EffectiveClientId => ClientName ?? (Source == CommandSource.Ai ? "ai-test" : "ui");
 
     /// <summary>Engine-Befehl. <paramref name="resolveOrderId"/> löst eine ClientOrderId in die OrderId der Engine auf.</summary>
