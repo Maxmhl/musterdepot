@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Musterdepot.Core/Musterdepot.Core.csproj" />
     <ProjectReference Include="../../src/Musterdepot.Mcp/Musterdepot.Mcp.csproj" />
+    <ProjectReference Include="../../src/Musterdepot.McpBridge/Musterdepot.McpBridge.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/dist/mcpb-manifest.schema.json",
+  "manifest_version": "0.3",
+  "name": "musterdepot",
+  "display_name": "Musterdepot (Paper-Trading)",
+  "version": "0.1.0",
+  "description": "Verbindet Claude Desktop mit dem lokal laufenden Musterdepot (Paper-Trading mit Spielgeld).",
+  "long_description": "Die Erweiterung startet die kleine Brücke Musterdepot.McpBridge.exe. Sie verbindet sich über eine Named Pipe (nur für den eigenen Windows-Benutzer) mit dem laufenden Programm Musterdepot. Kurse, Depot, Orders, Watchlists und Alarme stehen als Tools bereit; Limits, Freigaben und Not-Aus bleiben im Programm. Musterdepot muss laufen und der MCP-Server in den Einstellungen aktiviert sein.",
+  "author": {
+    "name": "Musterdepot"
+  },
+  "server": {
+    "type": "binary",
+    "entry_point": "server/Musterdepot.McpBridge.exe",
+    "mcp_config": {
+      "command": "${__dirname}/server/Musterdepot.McpBridge.exe",
+      "args": [],
+      "env": {
+        "MUSTERDEPOT_TOKEN": "${user_config.token}"
+      }
+    }
+  },
+  "user_config": {
+    "token": {
+      "type": "string",
+      "title": "Musterdepot-Token",
+      "description": "Token eines KI-Clients aus Musterdepot (Einstellungen > KI-Clients). Beginnt mit mdp_.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "tools": [
+    { "name": "search_symbol", "description": "Instrumente suchen" },
+    { "name": "get_quote", "description": "Aktueller Kurs mit Quelle und Verzögerung" },
+    { "name": "get_candles", "description": "Kerzen (OHLCV)" },
+    { "name": "get_orderbook", "description": "Orderbuch (nur Krypto)" },
+    { "name": "place_order", "description": "Order aufgeben (mit idempotency_key, optional dry_run)" },
+    { "name": "modify_order", "description": "Order ändern" },
+    { "name": "cancel_order", "description": "Order stornieren" },
+    { "name": "list_orders", "description": "Orders auflisten" },
+    { "name": "get_portfolio", "description": "Depotübersicht" },
+    { "name": "get_positions", "description": "Positionen" },
+    { "name": "get_trade_history", "description": "Ausführungen" },
+    { "name": "get_performance_stats", "description": "Statistik" },
+    { "name": "list_watchlists", "description": "Watchlists" },
+    { "name": "list_alerts", "description": "Kursalarme" },
+    { "name": "create_watchlist", "description": "Watchlist anlegen" },
+    { "name": "add_to_watchlist", "description": "Symbol zur Watchlist hinzufügen" },
+    { "name": "remove_from_watchlist", "description": "Symbol aus Watchlist entfernen" },
+    { "name": "delete_watchlist", "description": "Watchlist löschen" },
+    { "name": "create_alert", "description": "Kursalarm anlegen" },
+    { "name": "delete_alert", "description": "Kursalarm löschen" },
+    { "name": "get_settings", "description": "Einstellungen (ohne Geheimnisse)" },
+    { "name": "update_settings", "description": "Unkritische Einstellungen ändern" },
+    { "name": "get_audit_log", "description": "Protokoll" },
+    { "name": "get_agent_status", "description": "Status des KI-Clients" },
+    { "name": "engage_kill_switch", "description": "Not-Aus auslösen" }
+  ],
+  "compatibility": {
+    "platforms": ["win32"]
+  },
+  "keywords": ["paper-trading", "depot", "krypto", "aktien"],
+  "license": "Proprietary"
+}
