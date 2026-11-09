@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Musterdepot.App/Musterdepot.App.csproj" />
+    <Project Path="src/Musterdepot.Charting/Musterdepot.Charting.csproj" />
     <Project Path="src/Musterdepot.Commands/Musterdepot.Commands.csproj" />
     <Project Path="src/Musterdepot.Core/Musterdepot.Core.csproj" />
     <Project Path="src/Musterdepot.Engine/Musterdepot.Engine.csproj" />
@@ -10,6 +11,7 @@
     <Project Path="src/Musterdepot.Persistence/Musterdepot.Persistence.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Musterdepot.Charting.Tests/Musterdepot.Charting.Tests.csproj" />
     <Project Path="tests/Musterdepot.Commands.Tests/Musterdepot.Commands.Tests.csproj" />
     <Project Path="tests/Musterdepot.Engine.Tests/Musterdepot.Engine.Tests.csproj" />
     <Project Path="tests/Musterdepot.IntegrationTests/Musterdepot.IntegrationTests.csproj" />

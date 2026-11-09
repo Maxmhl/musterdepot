@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Musterdepot.Charting</RootNamespace>
+    <Description>Plattformneutrale Chart-Logik: Indikatoren in decimal, Kerzen → Chart-DTOs, CSV-Export.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Musterdepot.Core/Musterdepot.Core.csproj" />
+  </ItemGroup>
+</Project>
