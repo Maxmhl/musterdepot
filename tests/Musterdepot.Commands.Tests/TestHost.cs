@@ -32,7 +32,7 @@ public sealed class TempDb : IDisposable
 /// <summary>DI-Aufbau mit echter Persistence, Fake-Engine und Fake-Hub.</summary>
 public sealed class TestHost : IAsyncDisposable
 {
-    public const string Account = "main";
+    public const string Acc = "main";
     public const string AutoAi = "auto-ai";
     public const string ConfirmAi = "confirm-ai";
     public const string ReadOnlyAi = "ro-ai";
@@ -102,7 +102,7 @@ public sealed class TestHost : IAsyncDisposable
         await sp.GetRequiredService<SettingsService>().LoadAsync();
 
         if (openAccount)
-            engine.Execute(new OpenAccountRequest { AccountId = Account, Name = "Test", InitialCash = 100_000m, Risk = settings.Risk });
+            engine.Execute(new OpenAccountRequest { AccountId = Acc, Name = "Test", InitialCash = 100_000m, Risk = settings.Risk });
 
         return new TestHost(db, sp, engine, hub, clock, notifier);
     }
