@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Musterdepot.Core.Domain;
 
 namespace Musterdepot.Core.MarketData;
@@ -6,6 +7,13 @@ namespace Musterdepot.Core.MarketData;
 /// Schnittstelle A: einheitlicher Strom aus Trades, Kursen und Orderbuch-Updates.
 /// Jedes Ereignis trägt Source, AsOfUtc, DelayedMinutes und ein Qualitätsflag.
 /// </summary>
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(TradeTick), "trade")]
+[JsonDerivedType(typeof(QuoteTick), "quote")]
+[JsonDerivedType(typeof(OrderBookUpdate), "book")]
+[JsonDerivedType(typeof(CandleUpdate), "candle")]
+[JsonDerivedType(typeof(ConnectionStatusChanged), "status")]
+[JsonDerivedType(typeof(GapDetected), "gap")]
 public abstract record MarketEvent
 {
     public required string Symbol { get; init; }
@@ -18,7 +26,7 @@ public abstract record MarketEvent
     /// <summary>Verzögerung der Quelle in Minuten (0 = Echtzeit).</summary>
     public int DelayedMinutes { get; init; }
     public DataQuality Quality { get; init; } = DataQuality.Realtime;
-    public bool IsRealtime => DelayedMinutes == 0 && Quality == DataQuality.Realtime;
+    [JsonIgnore] public bool IsRealtime => DelayedMinutes == 0 && Quality == DataQuality.Realtime;
 }
 
 public sealed record TradeTick : MarketEvent
