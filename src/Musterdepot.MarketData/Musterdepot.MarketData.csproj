@@ -1,9 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Musterdepot.MarketData</RootNamespace>
-
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Musterdepot.Core/Musterdepot.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Musterdepot.MarketData.Tests" />
   </ItemGroup>
 </Project>
