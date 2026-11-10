@@ -1,15 +1,22 @@
+using System.Text.Json.Serialization;
+
 namespace Musterdepot.Core.Domain;
 
 /// <summary>Risikoregeln, geprüft vor jeder Order, egal ob Mensch oder KI.</summary>
 public sealed record RiskConfig
 {
     /// <summary>Max. Ordergröße absolut (EUR), null = unbegrenzt.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // null = unbegrenzt, muss gespeichert werden
     public decimal? MaxOrderNotional { get; init; } = 10_000m;
     /// <summary>Max. Ordergröße in % des Depotwerts.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // null = unbegrenzt, muss gespeichert werden
     public decimal? MaxOrderPercentOfEquity { get; init; } = 25m;
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // null = unbegrenzt, muss gespeichert werden
     public decimal? MaxPositionNotional { get; init; } = 25_000m;
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // null = unbegrenzt, muss gespeichert werden
     public decimal? MaxPositionPercentOfEquity { get; init; } = 50m;
     /// <summary>Max. Tagesverlust (EUR, positiv angegeben). Danach nur noch reduzierende Orders.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // null = unbegrenzt, muss gespeichert werden
     public decimal? MaxDailyLoss { get; init; } = 1_000m;
     public decimal? MaxDailyLossPercent { get; init; }
     public int MaxOrdersPerMinuteHuman { get; init; } = 30;
