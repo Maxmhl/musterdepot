@@ -1,0 +1,14 @@
+{
+  "accountId": "golden",
+  "name": "Golden Lücke",
+  "initialCash": 100000,
+  "risk": { "maxOrderNotional": 50000, "maxOrderPercentOfEquity": 50, "maxPositionNotional": 80000, "maxPositionPercentOfEquity": 80, "maxDailyLoss": 5000, "maxDailyLossPercent": 10, "maxOrdersPerMinuteHuman": 30, "maxOrdersPerMinuteAi": 10, "priceBandPercent": 10, "maxOpenOrders": 50, "maxQuoteAge": "00:02:00" },
+  "cryptoFees": { "kind": "Combined", "fixedFee": 0.5, "makerRate": 0.001, "takerRate": 0.002, "minFee": 1, "maxFee": 50 },
+  "steps": [
+    { "$type": "place", "atUtc": "2026-11-10T10:00:10Z", "clientOrderId": "buy", "symbol": "BTC/EUR", "side": "Buy", "type": "Market", "quantity": 0.4, "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:04:00Z", "clientOrderId": "stop", "symbol": "BTC/EUR", "side": "Sell", "type": "Stop", "quantity": 0.2, "stopPrice": 59600, "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:04:00Z", "clientOrderId": "trail", "symbol": "BTC/EUR", "side": "Sell", "type": "TrailingStop", "quantity": 0.1, "trailAmount": 150, "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:04:00Z", "clientOrderId": "dip", "symbol": "BTC/EUR", "side": "Buy", "type": "Limit", "quantity": 0.3, "limitPrice": 59000, "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:04:00Z", "clientOrderId": "sl", "symbol": "BTC/EUR", "side": "Sell", "type": "StopLimit", "quantity": 0.1, "stopPrice": 59300, "limitPrice": 59200, "timeInForce": "Gtc" }
+  ]
+}

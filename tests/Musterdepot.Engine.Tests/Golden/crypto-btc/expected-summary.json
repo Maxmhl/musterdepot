@@ -1,0 +1,199 @@
+{
+  "stats": {
+    "tradeCount": 5,
+    "wins": 1,
+    "losses": 4,
+    "winRate": 20.0,
+    "profitFactor": 0.0010,
+    "expectancy": -79.59,
+    "grossProfit": 0.40,
+    "grossLoss": -398.34,
+    "netPnl": -397.94,
+    "totalFees": 311.36,
+    "feeSharePercent": 221.18,
+    "maxDrawdown": 629.57,
+    "maxDrawdownPercent": 0.63,
+    "averageHoldingTime": "00:11:40",
+    "averageWin": 0.40,
+    "averageLoss": -99.59
+  },
+  "portfolio": {
+    "accountId": "golden",
+    "baseCurrency": "EUR",
+    "asOfUtc": "2026-11-10T10:29:58+00:00",
+    "cash": 84634.74,
+    "reservedCash": 0,
+    "availableCash": 84634.74,
+    "positionsValue": 14963.90,
+    "equity": 99598.64,
+    "realizedPnl": -397.94,
+    "unrealizedPnl": -3.42,
+    "feesPaid": 311.36,
+    "dayPnl": -401.36,
+    "dayStartEquity": 100000,
+    "killSwitchEngaged": false,
+    "dailyLossLimitHit": false,
+    "positions": [
+      {
+        "symbol": "BTC/EUR",
+        "quantity": 0.25000000,
+        "averageCost": 59720,
+        "costBasis": 14967.32,
+        "lastPrice": 59855.6,
+        "marketValue": 14963.90,
+        "unrealizedPnl": -3.42,
+        "unrealizedPnlPercent": -0.02,
+        "realizedPnl": -397.94,
+        "quoteCurrency": "EUR",
+        "priceIsDelayed": false,
+        "priceAsOfUtc": "2026-11-10T10:29:58+00:00",
+        "lots": [
+          {
+            "lotId": "lot_fill_000107",
+            "symbol": "BTC/EUR",
+            "quantity": 0.05,
+            "price": 59800,
+            "costPerUnitBase": 59949.4,
+            "openedUtc": "2026-11-10T10:12:56+00:00",
+            "openingFillId": "fill_000107",
+            "source": "Ai",
+            "strategyTag": "ki"
+          },
+          {
+            "lotId": "lot_fill_000112",
+            "symbol": "BTC/EUR",
+            "quantity": 0.02460322,
+            "price": 59700,
+            "costPerUnitBase": 59849.0766655747,
+            "openedUtc": "2026-11-10T10:13:18+00:00",
+            "openingFillId": "fill_000112",
+            "source": "Human",
+            "strategyTag": "dip"
+          },
+          {
+            "lotId": "lot_fill_000114",
+            "symbol": "BTC/EUR",
+            "quantity": 0.01591389,
+            "price": 59700,
+            "costPerUnitBase": 59849.6030825901,
+            "openedUtc": "2026-11-10T10:13:20+00:00",
+            "openingFillId": "fill_000114",
+            "source": "Human",
+            "strategyTag": "dip"
+          },
+          {
+            "lotId": "lot_fill_000116",
+            "symbol": "BTC/EUR",
+            "quantity": 0.07820405,
+            "price": 59700,
+            "costPerUnitBase": 59849.2021832629,
+            "openedUtc": "2026-11-10T10:13:22+00:00",
+            "openingFillId": "fill_000116",
+            "source": "Human",
+            "strategyTag": "dip"
+          },
+          {
+            "lotId": "lot_fill_000118",
+            "symbol": "BTC/EUR",
+            "quantity": 0.06090243,
+            "price": 59700,
+            "costPerUnitBase": 59849.3360609749,
+            "openedUtc": "2026-11-10T10:13:24+00:00",
+            "openingFillId": "fill_000118",
+            "source": "Human",
+            "strategyTag": "dip"
+          },
+          {
+            "lotId": "lot_fill_000120",
+            "symbol": "BTC/EUR",
+            "quantity": 0.00918024,
+            "price": 59700,
+            "costPerUnitBase": 59849.1978423222,
+            "openedUtc": "2026-11-10T10:13:26+00:00",
+            "openingFillId": "fill_000120",
+            "source": "Human",
+            "strategyTag": "dip"
+          },
+          {
+            "lotId": "lot_fill_000122",
+            "symbol": "BTC/EUR",
+            "quantity": 0.01119617,
+            "price": 59700,
+            "costPerUnitBase": 59849.0376619862,
+            "openedUtc": "2026-11-10T10:13:28+00:00",
+            "openingFillId": "fill_000122",
+            "source": "Human",
+            "strategyTag": "dip"
+          }
+        ]
+      }
+    ]
+  },
+  "steps": [
+    {
+      "atUtc": "2026-11-10T10:00:01+00:00",
+      "accepted": true,
+      "orderId": "ord_000002"
+    },
+    {
+      "atUtc": "2026-11-10T10:00:30+00:00",
+      "accepted": true,
+      "orderId": "ord_000012"
+    },
+    {
+      "atUtc": "2026-11-10T10:01:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000015"
+    },
+    {
+      "atUtc": "2026-11-10T10:02:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000032"
+    },
+    {
+      "atUtc": "2026-11-10T10:03:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000045"
+    },
+    {
+      "atUtc": "2026-11-10T10:03:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000047"
+    },
+    {
+      "atUtc": "2026-11-10T10:05:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000064"
+    },
+    {
+      "atUtc": "2026-11-10T10:05:00+00:00",
+      "accepted": false,
+      "rejectReason": "Preis 50000 liegt mehr als 10 % vom letzten Kurs 60242.7 entfernt.",
+      "riskRule": "PriceBand"
+    },
+    {
+      "atUtc": "2026-11-10T10:20:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000134"
+    },
+    {
+      "atUtc": "2026-11-10T10:25:00+00:00",
+      "accepted": false,
+      "rejectReason": "Order \u0027ord_000012\u0027 ist nicht mehr offen (Filled)."
+    },
+    {
+      "atUtc": "2026-11-10T10:29:00+00:00",
+      "accepted": true
+    },
+    {
+      "atUtc": "2026-11-10T10:29:30+00:00",
+      "accepted": false,
+      "rejectReason": "Den Not-Aus kann nur ein Mensch im Programm l\u00F6sen.",
+      "riskRule": "KillSwitch"
+    },
+    {
+      "atUtc": "2026-11-10T10:29:40+00:00",
+      "accepted": true
+    }
+  ]
+}

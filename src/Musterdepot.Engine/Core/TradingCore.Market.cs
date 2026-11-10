@@ -54,7 +54,10 @@ public static partial class TradingCore
                 ExpireOrder(s, cur);
                 continue;
             }
-            if (cur.Type == OrderType.Market && s.Now - cur.EligibleFromUtc > AllowedQuoteAge(sym, s.State.Risk, s.Ctx))
+            // Wartende Market-Order ohne passende Daten: abbrechen, sobald auch verzögerte Daten (Verzögerung + Dateiintervall,
+            // doppelte Toleranz) längst da sein müssten.
+            var pendingLimit = AllowedQuoteAge(sym, s.State.Risk, s.Ctx) + (sym is { IsDelayed: true } ? s.Ctx.Options.DelayedDataTolerance : TimeSpan.Zero);
+            if (cur.Type == OrderType.Market && s.Now - cur.EligibleFromUtc > pendingLimit)
                 CancelOrder(s, cur, "Keine frischen Marktdaten für die Market-Order", cur.Source);
         }
     }
