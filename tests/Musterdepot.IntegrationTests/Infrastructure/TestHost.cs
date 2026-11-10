@@ -204,3 +204,14 @@ public sealed class TestHost : IAsyncDisposable
         }
     }
 }
+
+/// <summary>
+/// Alle Testklassen, die einen <see cref="TestHost"/> verwenden, laufen nacheinander. Sonst könnten parallele Tests
+/// synchron in <see cref="TestHost.Create"/> warten und dabei alle Threads des xUnit-Synchronisationskontexts belegen,
+/// die der gerade laufende Host für seine await-Fortsetzungen braucht (Verklemmung bis zum Timeout).
+/// </summary>
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class TestHostCollection
+{
+    public const string Name = "TestHost";
+}

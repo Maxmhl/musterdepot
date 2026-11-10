@@ -12,6 +12,7 @@ namespace Musterdepot.IntegrationTests;
 /// Eigenschaftstests über den vollständigen DI-Container: Befehle laufen durch <see cref="ICommandBus"/>
 /// (Mensch und KI), Marktdaten in die Engine aus dem Container. FsCheck erzeugt und verkleinert die Aktionsfolgen.
 /// </summary>
+[Collection(TestHostCollection.Name)]
 public class DiPropertyTests
 {
     private const string Acc = "main";

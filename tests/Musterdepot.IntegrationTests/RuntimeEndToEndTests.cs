@@ -13,6 +13,7 @@ namespace Musterdepot.IntegrationTests;
 /// Ende-zu-Ende mit allen <c>AddMusterdepot*</c>-Erweiterungen: SQLite im Temp-Verzeichnis, Replay-Quelle auf der
 /// Host-Uhr, Engine, Befehlsschicht, MCP (Port 0) und <see cref="IMusterdepotRuntime"/>.
 /// </summary>
+[Collection(TestHostCollection.Name)]
 public class RuntimeEndToEndTests
 {
     private const string Acc = "main";

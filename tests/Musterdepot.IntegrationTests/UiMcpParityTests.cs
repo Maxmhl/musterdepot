@@ -17,6 +17,7 @@ namespace Musterdepot.IntegrationTests;
 /// <see cref="IMcpServerHost"/> (SDK-Client, Bearer-Token, Modus autonomous). Verglichen werden Ergebnisstatus,
 /// Orders, Fills und Portfolio – ohne IDs, Source und Client-Namen.
 /// </summary>
+[Collection(TestHostCollection.Name)]
 public class UiMcpParityTests
 {
     private const string Acc = "main";

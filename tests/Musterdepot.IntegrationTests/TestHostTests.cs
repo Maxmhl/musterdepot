@@ -4,6 +4,7 @@ using Musterdepot.IntegrationTests.Infrastructure;
 
 namespace Musterdepot.IntegrationTests;
 
+[Collection(TestHostCollection.Name)]
 public class TestHostTests
 {
     [Fact]
