@@ -199,7 +199,11 @@ public sealed partial class OrderTicketViewModel : PageViewModel
         };
     }
 
-    private void SchedulePreview() => _ = PreviewAsync();
+    /// <summary>Vorschau nur, solange das Ticket sichtbar ist (jede Vorschau läuft durch die Befehlsschicht).</summary>
+    private void SchedulePreview()
+    {
+        if (IsActive) _ = PreviewAsync();
+    }
 
     private async Task PreviewAsync()
     {
