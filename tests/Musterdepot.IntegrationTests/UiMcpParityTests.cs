@@ -200,6 +200,48 @@ public class UiMcpParityTests
     }
 
     [Fact]
+    public async Task KillSwitch_ViaMcp_OnlyHumanCanRelease()
+    {
+        var fixture = ReplayFixture.Load(FixtureGenerator.QuietName);
+        await using var host = TestHost.Create(o => { o.ReplayFile = fixture.ReplayPath; o.StartUtc = fixture.StartUtc; });
+        await host.Runtime.StartAsync();
+        host.Replay!.AdvanceTo(fixture.StartUtc.AddMinutes(3));
+        var (_, token) = await host.Get<ITokenService>().CreateClientAsync("Not-Aus-KI", ClientScopes.Read | ClientScopes.Trade, ClientMode.Autonomous);
+        var mcpHost = host.Get<IMcpServerHost>();
+        await mcpHost.StartAsync();
+        await using var client = await McpClient.CreateAsync(new HttpClientTransport(new HttpClientTransportOptions
+        {
+            Endpoint = mcpHost.Endpoint!,
+            AdditionalHeaders = new Dictionary<string, string> { ["Authorization"] = $"Bearer {token}" },
+        }));
+
+        // Es gibt kein Tool zum Lösen.
+        var tools = (await client.ListToolsAsync()).Select(t => t.Name).ToList();
+        Assert.Contains("engage_kill_switch", tools);
+        Assert.DoesNotContain(tools, t => t.Contains("release", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal("executed", Status(await client.CallToolAsync("engage_kill_switch", new Dictionary<string, object?> { ["reason"] = "Test über MCP" })));
+        Assert.True(host.Engine.IsKillSwitchEngaged(Acc));
+        var blocked = await client.CallToolAsync("place_order", new Dictionary<string, object?>
+        {
+            ["symbol"] = "BTC/EUR", ["side"] = "buy", ["order_type"] = "market", ["quantity"] = 0.01m, ["idempotency_key"] = "nach-not-aus",
+        });
+        Assert.Equal("rejected", Status(blocked));
+        Assert.True(blocked.IsError);
+        var status = Data(await client.CallToolAsync("get_agent_status", new Dictionary<string, object?>()));
+        Assert.True(status.GetProperty("kill_switch_engaged").GetBoolean());
+
+        // Der Mensch löst im Programm.
+        Assert.Equal(CommandStatus.Executed, (await host.Bus.SendAsync(new ReleaseKillSwitchCommand { IdempotencyKey = "release" })).Status);
+        Assert.False(host.Engine.IsKillSwitchEngaged(Acc));
+        Assert.Equal("executed", Status(await client.CallToolAsync("place_order", new Dictionary<string, object?>
+        {
+            ["symbol"] = "BTC/EUR", ["side"] = "buy", ["order_type"] = "market", ["quantity"] = 0.01m, ["idempotency_key"] = "nach-freigabe",
+        })));
+        await host.Runtime.StopAsync();
+    }
+
+    [Fact]
     public void Normalization_IgnoresOnlyIdentityFields()
     {
         var o = JsonNode.Parse("""{"orderId":"a","price":1.5,"lots":[{"lotId":"x","quantity":2}],"source":"Ai"}""");
