@@ -1,0 +1,1 @@
+{"channel": "book", "type": "update", "data": [{"symbol": "BTC/EUR", "bids": [{"price": 61999.8, "qty": 0.75}, {"price": 61998.0, "qty": 1.5}], "asks": [{"price": 62000.1, "qty": 0.0}, {"price": 62005.5, "qty": 0.33}], "checksum": 1625659938, "timestamp": "2026-11-09T10:15:01.123456Z"}]}

@@ -1,0 +1,1 @@
+{"event":"ticker24h","data":[{"market":"BTC-EUR","startTimestamp":1794132000000,"timestamp":1794218400000,"open":"60000","openTimestamp":1794132000123,"high":"62300","low":"59800","last":"61500","closeTimestamp":1794218399000,"bid":"61499","bidSize":"0.25","ask":"61501","askSize":"0.4","volume":"1110.07120335","volumeQuote":"67123456.12"}]}

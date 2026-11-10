@@ -1,0 +1,1 @@
+{"channel":"trade","type":"update","data":[{"symbol":"BTC/EUR","side":"buy","price":62000.0,"qty":0.01500000,"ord_type":"market","trade_id":81234567,"timestamp":"2026-11-09T10:15:00.708706Z"},{"symbol":"BTC/EUR","side":"sell","price":61999.9,"qty":0.00250000,"ord_type":"limit","trade_id":81234568,"timestamp":"2026-11-09T10:15:00.812001Z"}]}

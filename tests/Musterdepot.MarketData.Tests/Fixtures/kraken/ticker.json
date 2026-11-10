@@ -1,0 +1,1 @@
+{"channel":"ticker","type":"update","data":[{"symbol":"BTC/EUR","bid":61999.9,"bid_qty":0.52143201,"ask":62000.0,"ask_qty":1.20000000,"last":62000.0,"volume":1834.27183654,"vwap":61423.7,"low":60511.2,"high":62250.0,"change":1088.6,"change_pct":1.79,"timestamp":"2026-11-09T10:15:00.512345Z"}]}

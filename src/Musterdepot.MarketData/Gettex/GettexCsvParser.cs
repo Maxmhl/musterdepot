@@ -372,6 +372,10 @@ public sealed class GettexCsvParser(GettexParserOptions? options = null)
 
     private static string TrimFraction(string s)
     {
+        // Sekundenbruchteile mit Komma (de-DE: "09:00:01,123") → Punkt.
+        var lastColon = s.LastIndexOf(':');
+        var comma = s.LastIndexOf(',');
+        if (lastColon >= 0 && comma > lastColon) s = s[..comma] + "." + s[(comma + 1)..];
         var dot = s.LastIndexOf('.');
         if (dot < 0 || dot < s.LastIndexOf(':')) return s;
         int end = dot + 1;
