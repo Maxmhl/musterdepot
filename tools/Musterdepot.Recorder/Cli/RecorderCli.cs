@@ -12,9 +12,9 @@ public static class RecorderCli
         Musterdepot.Recorder – Marktdaten für Golden Replays und Backtests aufzeichnen und prüfen
 
         Aufruf:
-          Musterdepot.Recorder record --symbols BTC/EUR,ETH/EUR [--minutes 60] [--out pfad.jsonl.gz]
-                                      [--sources kraken,bitvavo] [--no-rotate] [--verbose]
-              Zeichnet alle Ereignisse der Symbole auf (MarketEventJsonl-Format). Ohne --minutes bis Strg+C.
+          Musterdepot.Recorder record --symbols BTC/EUR,ETH/EUR [--minutes 60] [--seconds 0]
+                                      [--out pfad.jsonl.gz] [--sources kraken,bitvavo] [--no-rotate] [--verbose]
+              Zeichnet alle Ereignisse der Symbole auf (MarketEventJsonl-Format). Ohne --minutes/--seconds bis Strg+C.
               Stündlich neue Datei (pfad-yyyyMMdd-HH.jsonl.gz), außer mit --no-rotate.
               Quellen: kraken, bitvavo, coinbase, gettex, cboe, ecb, fake. Standard-Ziel:
               %LOCALAPPDATA%\Musterdepot\recordings (bzw. MUSTERDEPOT_DATA_DIR\recordings).

@@ -4,12 +4,12 @@ using Musterdepot.IntegrationTests.Infrastructure;
 
 namespace Musterdepot.IntegrationTests;
 
+[Collection(TestHostCollection.Name)]
 public class TestHostTests
 {
     [Fact]
     public async Task Host_UsesTemporaryDataDirectory_AndRestoresEnvironment()
     {
-        var before = Environment.GetEnvironmentVariable(TestHost.DataDirVariable);
         string dataDir;
         await using (var host = TestHost.Create())
         {
@@ -20,7 +20,8 @@ public class TestHostTests
             Assert.StartsWith(dataDir, AppPaths.DatabasePath);
         }
         Assert.False(Directory.Exists(dataDir));
-        Assert.Equal(before, Environment.GetEnvironmentVariable(TestHost.DataDirVariable));
+        // Zurückgesetzt (parallele Tests können inzwischen einen eigenen Host mit eigenem Verzeichnis haben).
+        Assert.NotEqual(dataDir, Environment.GetEnvironmentVariable(TestHost.DataDirVariable));
     }
 
     [Fact]

@@ -28,14 +28,16 @@ dotnet test Musterdepot.slnx                        # Windows: alles
 |---|---|
 | `Infrastructure/ReplayFixture` | lädt `<name>.orders.json` + die genannte Aufzeichnung; `Timeline()` mischt Marktereignisse und Orderschritte zeitlich (bei Gleichstand Marktdaten zuerst); `ReplayFixture.Names()` für `[MemberData]` |
 | `Infrastructure/GoldenFile` | vergleicht ein Objekt (als eingerücktes JSON mit `JsonDefaults`-Regeln, LF) mit `tests/data/golden/<name>.json`; `UPDATE_GOLDEN=1` schreibt neu; bei Abweichung entsteht `<name>.actual.json` (ignoriert) und die Meldung nennt die erste abweichende Zeile |
-| `Infrastructure/TestHost` | DI-Container mit allen `AddMusterdepot*`-Erweiterungen, temporärem Datenverzeichnis über `MUSTERDEPOT_DATA_DIR`, `ManualClock`, `SequentialIdGenerator`, `SeededRandom`, Fake-Marktdaten (`DataSourceSettings.UseFakeData`, keine Netzquellen); `ConfigureServices` zum Ersetzen einzelner Dienste. Höchstens ein Host gleichzeitig (Umgebungsvariable ist prozessweit) – immer `await using` |
+| `Infrastructure/TestHost` | DI-Container mit allen `AddMusterdepot*`-Erweiterungen, temporärem Datenverzeichnis über `MUSTERDEPOT_DATA_DIR` (SQLite darin), `ManualClock`, `SequentialIdGenerator`, `SeededRandom`, Fake-Marktdaten (`DataSourceSettings.UseFakeData`, keine Netzquellen) oder mit `ReplayFile` eine `RecordedMarketDataSource` auf der Host-Uhr (ohne AutoPlay, Fortschritt per `host.Replay.AdvanceTo`), MCP auf Port 0 ohne Pipe, kurze `CommandOptions`; `DataDirectory` für Neustart-Tests, `ConfigureServices` zum Ersetzen einzelner Dienste. Höchstens ein Host gleichzeitig (Umgebungsvariable ist prozessweit) – immer `await using`, und Testklassen mit `[Collection(TestHostCollection.Name)]` markieren (nicht parallel, sonst Verklemmung im xUnit-Synchronisationskontext) |
+| `Infrastructure/GoldenReplay` | setzt ein Orderskript in ein `BacktestScript` der Engine um, spielt es mit `BacktestRunner` ab (Golden-Format) und prüft die `expect`-Felder |
+| `Infrastructure/Invariants` | Invarianten über die öffentliche `ITradingEngine`-Schnittstelle: Geld bleibt erhalten (cent-genau), keine negativen Mengen, Limit-Fills, Risiko-Gate aus dem Event-Log, Zustands-Fingerabdruck für Live ↔ wiederhergestellt |
 | `Infrastructure/OrderBookState` | baut ein Orderbuch aus Snapshot/Deltas nach |
 | `Infrastructure/TestPaths` | Repository-Wurzel, `tests/data/...`, Temp-Ordner |
 
 Das Orderskript-Modell (`OrderScript`, `OrderScriptValidator`, `OrderScriptJson`), der Generator und die
 `inspect`-Statistik liegen im Recorder (`Musterdepot.Recorder.Fixtures` / `.Inspection`); das Testprojekt referenziert ihn.
 
-Schon jetzt laufende Tests (ohne echte Implementierungen):
+Tests der ersten Runde (Werkzeuge und Daten):
 
 - `FixtureTests`: lesbar, nach Replay-Zeit sortiert, AsOf je Symbol monoton, Zeilen kanonisch, Rundlauf über `.jsonl`,
   `.jsonl.gz` und `MarketEventJsonl.Writer`; Buch nie gekreuzt, Quotes = bestes Bid/Ask, Trades zum besten Preis,
@@ -46,6 +48,30 @@ Schon jetzt laufende Tests (ohne echte Implementierungen):
 - `RecorderToolTests`: Argumente, Zeitangaben, Quellen, stündliche Rotation, `inspect` (auch kaputte/abgeschnittene Dateien), `slice`, CLI.
 - `GoldenFileTests`: Verhalten von `GoldenFile`; Golden-Statistik je Szenario (`tests/data/golden/fixture-stats/*.json`).
 - `TestHostTests`: Datenverzeichnis, Wiederherstellen der Umgebung, deterministische Infrastruktur, Überschreiben, Serialisierung.
+
+Tests der zweiten Runde (gegen die echten Implementierungen):
+
+- `GoldenReplayTests`: je Szenario Golden-Datei `tests/data/golden/replays/<szenario>.json`, alle `expect`-Felder,
+  Determinismus, Geld/Risiko-Invarianten; Gap: Stop während der Lücke gefüllt (`ExecutedDuringGap`, `FillQuality.Gap`),
+  Stop nach Kurssprung > 200 EUR unter dem Stop, stornierte Order nie gefüllt; SAP: kein Fill vor Ordereingang
+  (`MarketDataAsOfUtc` > `CreatedUtc`), `FillQuality.Synthetic`, Market-Kauf erst mit der nächsten gettex-Datei gefüllt.
+- `DiPropertyTests` (FsCheck, 25 Folgen + 6 feste Seeds): Befehle durch `ICommandBus` (Mensch und KI), Marktdaten in die
+  Engine aus dem Container; nach jeder Aktion `Invariants.CheckAccount`; danach Risiko-Gate aus dem Event-Log
+  (kein Order während Not-Aus, MaxOrderNotional, Preisband), abgelehnte Befehle hinterlassen keine Order, absichtlich
+  zu große/zu weit entfernte Orders werden immer abgelehnt, KI kann den Not-Aus nie lösen, `LoadFromEvents` ≡ live.
+- `RuntimeEndToEndTests`: `IMusterdepotRuntime` mit SQLite, Replay, Engine, Befehlen und MCP: Start, Orders,
+  Suspend/Resume (Quelle `Suspended` → `Connected`), Stop, Neustart mit neuem `ServiceProvider` → identischer Zustand,
+  Idempotenz und Sequenz überleben den Neustart; dasselbe als FsCheck-Eigenschaft mit zufälligen Orders (5 Läufe);
+  Modus confirm: Freigabe über `IApprovalService.Resolve`, Ablehnung über `ResolveApprovalCommand`, KI kann nicht
+  selbst freigeben, Timeout → Denied, Freigebender im Protokoll; Not-Aus: KI löst aus, KI (auch als „Mensch“ getarnt)
+  kann nicht lösen, Mensch löst.
+- `UiMcpParityTests`: jedes Szenario einmal über `ICommandBus` (Source=Human, Client `ui`), einmal über `place_order`/
+  `cancel_order` des echten MCP-Servers (Port 0, Token aus `ITokenService.CreateClientAsync(..., Autonomous)`,
+  SDK-Client mit Bearer-Header) → gleiche Status, Orders, Fills, Buchungen, Portfolio (ohne IDs, Source,
+  Client-Namen, Storno-Auslöser); `get_portfolio` = Engine. Not-Aus über `engage_kill_switch`, kein Lösen-Tool,
+  Mensch löst. Uhrtakt nur an festen Stellen (deterministisch).
+- `RecorderFakeSourceTests`: `record --sources fake --seconds 3` schreibt eine lesbare, geordnete Aufzeichnung;
+  Abbruch (wie Strg+C) beendet sauber, stündliche Rotation ist Standard.
 
 ## Testdaten: `tests/data/replays`
 
@@ -145,20 +171,23 @@ Aufzeichnung und zeitlich sortiert; Symbole unter `instruments` und in der Aufze
 Umsetzung: `step.ToEngineRequest(resolve)` (Engine direkt) bzw. `step.ToCommand(resolve, index)` (Befehlsschicht),
 `resolve` = ClientOrderId → OrderId (z. B. `engine.GetOrderByClientOrderId(...)?.OrderId`).
 
-## Golden-Replay-Format (Runde 2)
+## Golden-Replay-Format
 
-Ablauf je Szenario: `TestHost` (oder Engine direkt) mit `ManualClock` auf `fixture.StartUtc`; Konten aus
-`accounts` eröffnen; `foreach (var s in fixture.Timeline())`: Uhr auf `s.AtUtc`, `OnClockTick`, dann
-`OnMarketEvent(e)` bzw. Befehl ausführen. Am Ende wird `tests/data/golden/replays/<szenario>.json` verglichen:
+`GoldenReplay.Run(fixture)` setzt das Orderskript in ein `Musterdepot.Engine.Backtest.BacktestScript` um und spielt es
+mit dem `BacktestRunner` ab: frische `TradingEngine`, `ManualClock`, `SequentialIdGenerator`, Instrumente aus dem
+Skript (`StaticInstrumentResolver`), Replay-Uhr = `ReceivedUtc`, vor jedem Schritt/Ereignis `OnClockTick`, Schritte vor
+Ereignissen mit späterer Uhrzeit. Ergebnis `tests/data/golden/replays/<szenario>.json`:
 
 ```jsonc
 {
   "scenario": "btc-eur-gap",
-  "results": [ { "step": 0, "clientOrderId": "g-entry-1", "accepted": true, "rejectReason": null, "riskRule": null } ],
-  "events":  [ /* alle DomainEvents in Reihenfolge, wie JsonDefaults.SerializeEvent */ ],
-  "orders":  [ /* Endzustand Order je Konto */ ],
+  "results": [ { "step": 0, "atUtc": "…", "action": "PlaceOrder", "source": "Human", "clientOrderId": "g-entry-1",
+                 "accepted": true, "rejectReason": null, "riskRule": null } ],
+  "orders":  [ /* Endzustand aller Orders */ ],
   "fills":   [ /* Fill inkl. Quality, ExecutedDuringGap, MarketDataAsOfUtc */ ],
-  "portfolio": { /* PortfolioSnapshot am Ende */ }
+  "portfolio": { /* PortfolioSnapshot am Ende */ },
+  "stats":   { /* PerformanceStats */ },
+  "events":  [ /* alle DomainEvents in Reihenfolge (JsonDefaults) */ ]
 }
 ```
 
@@ -176,7 +205,7 @@ dotnet run --project tools/Musterdepot.Recorder -- slice recordings/btc-20261109
     --from +10m --to +40m --symbols BTC/EUR --out tests/data/replays/btc-eur-real.jsonl
 ```
 
-- `record` holt `IMarketDataHub` per DI (`AddMusterdepotMarketData(new DataSourceSettings{…})`); ist keiner registriert,
+- `record` (Dauer per `--minutes` und/oder `--seconds`, sonst bis Strg+C) holt `IMarketDataHub` per DI (`AddMusterdepotMarketData(new DataSourceSettings{…})`); ist keiner registriert,
   endet es mit Exitcode 3 und einer klaren Meldung. Quellen: `kraken, bitvavo, coinbase, gettex, cboe, ecb, fake`
   (`fake` zum Testen der Kette ohne Netz). Ohne `--out`: `%LOCALAPPDATA%\Musterdepot\recordings\` (bzw. `MUSTERDEPOT_DATA_DIR`).
 - `inspect` meldet Ereignisse je Typ/Symbol/Quelle/Qualität, Zeitraum (AsOf und Empfang), Rücksprünge, Lücken
@@ -185,31 +214,36 @@ dotnet run --project tools/Musterdepot.Recorder -- slice recordings/btc-20261109
 - Für ein neues Golden-Szenario aus echten Daten: ausschneiden, `<name>.orders.json` von Hand schreiben (`seed: 0`),
   `instruments` ergänzen, Test laufen lassen (Validator), Golden mit `UPDATE_GOLDEN=1` anlegen.
 
-## TODO Runde 2 (nach dem Zusammenführen, braucht echte Implementierungen)
+## Runde 2 – Stand
 
-- [ ] **Golden Replays**: je Szenario Replay durch die Engine, Vergleich mit `tests/data/golden/replays/<szenario>.json`; zusätzlich `expect`-Felder der Orderskripte prüfen.
-- [ ] **Eigenschaftstests über DI** (FsCheck, Engine aus `TestHost`): Geld bleibt erhalten (nach jeder Buchung: Cash = Summe aller `CashEntry`; Equity = Einzahlungen + realisierte + offene GuV, jeweils nach Gebühren; nichts entsteht oder verschwindet bei Rundung); Limit-Fills nie schlechter als Limit; keine negativen Mengen/kein Leerverkauf; Risiko-Gate wird nie umgangen (keine Order über Limits, auch nicht per Modify); Depotstand = Abspielen der Events (`LoadFromEvents` ergibt denselben Zustand).
-- [ ] **Oberfläche ↔ MCP**: dasselbe Orderskript einmal über `ICommandBus.SendAsync(step.ToCommand(...))` mit `Source=Human`, einmal über die MCP-Tools (`place_order`, `cancel_order`, … mit SDK-Client gegen `IMcpServerHost`) – gleiche Orders, Fills, Portfolio, Ablehnungsgründe (IDs/Zeitstempel/Source normalisiert).
-- [ ] **Runtime Ende-zu-Ende**: `IMusterdepotRuntime` im `TestHost` mit Replay-Quelle (WS1) starten, Standby/Aufwachen (`SuspendAsync`/`ResumeAsync`) mit `btc-eur-gap`, Persistenz in SQLite im Temp-Verzeichnis, Neustart lädt denselben Zustand.
-- [ ] **Recorder gegen echte Quellen**: `record --sources fake` als Integrationstest, danach echte Kraken/Bitvavo-Aufzeichnung als zusätzliches Szenario (sofern Netz verfügbar).
-- [ ] Verzögerte Aktie: Market-Order mit 25–40 Min. alten Kursen wird angenommen (Übungsmodus) und erst nach Eintreffen neuer Trades gefüllt; DAY-Orders verfallen zum gettex-Handelsschluss.
+- [x] **Golden Replays** je Szenario inkl. `expect`-Felder (`GoldenReplayTests`).
+- [x] **Eigenschaftstests über DI** (`DiPropertyTests`, `RuntimeEndToEndTests.Restart_from_sqlite_equals_live_state`).
+- [x] **Oberfläche ↔ MCP** (`UiMcpParityTests`).
+- [x] **Runtime Ende-zu-Ende** inkl. Freigabe (confirm) und Not-Aus (`RuntimeEndToEndTests`).
+- [x] **Recorder** `record --sources fake` (`RecorderFakeSourceTests`).
+- [ ] Echte Kraken/Bitvavo-Aufzeichnung als zusätzliches Szenario (braucht Netz; Börsen-Hosts in der Build-Umgebung gesperrt).
+- [ ] DAY-Order verfällt zum gettex-Handelsschluss in einem Replay über den ganzen Handelstag (heute: Engine-Tests von WS2).
+- [ ] Hinweis: `RecordedMarketDataSource` spielt Ereignisse zum `AsOfUtc` ab (nicht zum aufgezeichneten `ReceivedUtc`).
+  Für verzögerte Aufzeichnungen erscheinen Kurse im Runtime-Replay daher früher als im Golden Replay (`BacktestRunner`
+  nutzt `ReceivedUtc`). Für Paritäts- und Neustart-Tests unerheblich; für „so wie damals erlebt“-Replays ggf.
+  `EmitTime` auf `ReceivedUtc` umstellen (WS1).
 
 ## Abnahmekriterien der Roadmap (Checkliste)
 
 1. **Grundgerüst** – ◇ Fake-Kurse laufen durch Oberfläche und Engine
    - [x] Solution, Core, Schnittstellen A–D, Projektskelette
    - [x] CI (Linux + Windows), Installer-Pipeline (Velopack), Testgerüst, Fixtures
-   - [ ] Fake-Quelle → Hub → Engine → Lesemodelle → Oberfläche (Smoke-Test über `TestHost` mit `UseFakeData`)
+   - [x] Fake-Quelle → Hub → Recorder (`RecorderFakeSourceTests`); Replay-Quelle → Hub → Runtime → Engine → SQLite (`RuntimeEndToEndTests`)
 2. **Krypto live** – ◇ Golden Replays grün, Geld bleibt erhalten
-   - [ ] Kraken + Bitvavo aufzeichnen (`record`), `inspect` ohne Rücksprünge/Lücken
-   - [ ] Golden Replays `btc-eur-quiet`, `btc-eur-gap` grün (Market/Limit/Stop, Gebühren, Depot)
-   - [ ] Eigenschaftstest „Geld bleibt erhalten“ grün
+   - [ ] Kraken + Bitvavo aufzeichnen (`record`), `inspect` ohne Rücksprünge/Lücken (braucht Netz)
+   - [x] Golden Replays `btc-eur-quiet`, `btc-eur-gap` grün (Market/Limit/Stop/Stop-Limit/Notional, Gebühren, Depot)
+   - [x] Eigenschaftstest „Geld bleibt erhalten“ grün (cent-genau, über DI und im Golden Replay)
 3. **Aktien verzögert** – ◇ Kein Fill vor dem Ordereingang
-   - [ ] Golden Replay `sap-delayed` grün
-   - [ ] Eigenschaft: jeder Fill hat `MarketDataAsOfUtc` > Ordereingang, Qualität `Synthetic`
+   - [x] Golden Replay `sap-delayed` grün
+   - [x] Jeder Fill hat `MarketDataAsOfUtc` > Ordereingang, Qualität `Synthetic`
 4. **MCP + KI** – ◇ Oberfläche und MCP liefern gleiche Ergebnisse
-   - [ ] Vergleichstest ICommandBus (Human) ↔ MCP-Tools je Szenario grün
-   - [ ] MCP-Tests: nur 127.0.0.1, Token, Origin/Host-Prüfung, Ratenlimit, Not-Aus nur per Mensch lösbar
+   - [x] Vergleichstest ICommandBus (Human) ↔ MCP-Tools je Szenario grün
+   - [x] MCP-Tests: nur 127.0.0.1, Token, Origin/Host-Prüfung (`Musterdepot.Mcp.Tests`), Not-Aus nur per Mensch lösbar, Freigabe im Modus confirm (`IntegrationTests`)
    - [ ] `.mcpb` wird im Release gebaut
 5. **Ausbau** – Bracket, OCO, Statistik KI vs. Mensch, autonomer Modus, Backtests
    - [ ] Szenarien für Bracket/OCO/Trailing, Statistik getrennt nach `Source`, Backtest über aufgezeichnete Tage

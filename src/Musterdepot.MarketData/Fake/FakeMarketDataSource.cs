@@ -228,12 +228,15 @@ public sealed class FakeMarketDataSource : MarketDataSourceBase, IHistoryCapabil
                 }
         }
 
+        // Kurs und Buch nach den Trades dieses Schritts (AsOf je Symbol nicht fallend).
+        var afterTrades = asOf.AddTicks(n);
+
         // Kurs
         var bidSize = RoundToStep(spec.TypicalTradeSize * (decimal)(0.5 + _random.NextDouble() * 3), inst.QuantityStep);
         var askSize = RoundToStep(spec.TypicalTradeSize * (decimal)(0.5 + _random.NextDouble() * 3), inst.QuantityStep);
         events.Add(new QuoteTick
         {
-            Symbol = inst.Symbol, Source = SourceName, AsOfUtc = asOf, ReceivedUtc = now, DelayedMinutes = delayed, Quality = quality,
+            Symbol = inst.Symbol, Source = SourceName, AsOfUtc = afterTrades, ReceivedUtc = now, DelayedMinutes = delayed, Quality = quality,
             Bid = bid, Ask = ask, BidSize = bidSize, AskSize = askSize, Last = st.LastTrade ?? st.Price,
             Volume24h = st.Volume, High24h = st.High, Low24h = st.Low,
             ChangePercent = st.SessionOpen > 0 ? Math.Round(((st.LastTrade ?? st.Price) - st.SessionOpen) / st.SessionOpen * 100m, 4) : null,
@@ -254,7 +257,7 @@ public sealed class FakeMarketDataSource : MarketDataSourceBase, IHistoryCapabil
         bool snapshot = st.Bids.Count == 0 || st.Steps % _options.BookSnapshotEvery == 0;
         events.Add(new OrderBookUpdate
         {
-            Symbol = inst.Symbol, Source = SourceName, AsOfUtc = asOf, ReceivedUtc = now, Quality = quality,
+            Symbol = inst.Symbol, Source = SourceName, AsOfUtc = afterTrades, ReceivedUtc = now, Quality = quality,
             IsSnapshot = snapshot,
             Bids = snapshot ? newBids : Diff(st.Bids, newBids),
             Asks = snapshot ? newAsks : Diff(st.Asks, newAsks),
