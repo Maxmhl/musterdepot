@@ -14,11 +14,15 @@ public sealed class InverseBoolToVisibilityConverter : IValueConverter
         value is Visibility v && v != Visibility.Visible;
 }
 
-/// <summary>null/leerer Text → Collapsed, sonst Visible.</summary>
+/// <summary>null/leerer Text → Collapsed, sonst Visible. Parameter "invert" kehrt um.</summary>
 public sealed class NullToVisibilityConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-        value is null || value is string s && string.IsNullOrWhiteSpace(s) ? Visibility.Collapsed : Visibility.Visible;
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var empty = value is null || value is string s && string.IsNullOrWhiteSpace(s);
+        if (parameter is "invert") empty = !empty;
+        return empty ? Visibility.Collapsed : Visibility.Visible;
+    }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
 }
@@ -26,12 +30,17 @@ public sealed class NullToVisibilityConverter : IValueConverter
 /// <summary>Zahl &gt; 0 → Visible (z. B. Anzahl offener Freigaben).</summary>
 public sealed class PositiveToVisibilityConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        int i when i > 0 => Visibility.Visible,
-        decimal d when d > 0 => Visibility.Visible,
-        _ => Visibility.Collapsed,
-    };
+        var positive = value switch
+        {
+            int i => i > 0,
+            decimal d => d > 0,
+            _ => false,
+        };
+        if (parameter is "invert") positive = !positive;
+        return positive ? Visibility.Visible : Visibility.Collapsed;
+    }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
 }

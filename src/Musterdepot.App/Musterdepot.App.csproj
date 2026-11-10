@@ -19,6 +19,11 @@
     <Page Include="App.xaml" />
   </ItemGroup>
 
+  <!-- WPF-Projekte bekommen System.IO nicht als implizites using. -->
+  <ItemGroup>
+    <Using Include="System.IO" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../Musterdepot.Core/Musterdepot.Core.csproj" />
     <ProjectReference Include="../Musterdepot.Charting/Musterdepot.Charting.csproj" />
