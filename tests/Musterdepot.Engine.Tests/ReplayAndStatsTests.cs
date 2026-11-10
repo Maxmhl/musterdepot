@@ -222,3 +222,24 @@ public class DependencyInjectionTests
         Assert.Equal(T0, engine.GetAccounts().Single().CreatedUtc);
     }
 }
+
+public class ConcurrencyTests
+{
+    [Fact]
+    public void Parallel_writers_get_contiguous_sequences()
+    {
+        var t = new TestEngine();
+        t.Trade(Btc, 100m);
+        Parallel.For(0, 400, i =>
+        {
+            if (i % 3 == 0) t.Engine.Execute(new DepositCashRequest { AccountId = Acc, Amount = 1m });
+            else if (i % 3 == 1) t.Engine.OnMarketEvent(new Musterdepot.Core.MarketData.TradeTick { Symbol = Btc, Source = "kraken", AsOfUtc = t.Now, Price = 100m + i % 7, Quantity = 1m });
+            else t.Engine.Execute(t.Request(Btc, OrderSide.Buy, OrderType.Limit, 0.01m, limit: 99m, clientOrderId: $"p{i}"));
+            _ = t.Engine.GetPortfolio(Acc);
+        });
+        var events = t.Engine.GetEvents(Acc);
+        Assert.Equal(Enumerable.Range(1, events.Count).Select(i => (long)i), events.Select(e => e.Sequence));
+        Assert.Equal(events.Count, t.Appended.Count);
+        Assert.Equal(100_000m + 134m, t.Portfolio.Cash);
+    }
+}

@@ -503,8 +503,9 @@ public static partial class TradingCore
         };
     }
 
+    /// <summary>Offene Kind-Orders einer Bracket.</summary>
     internal static IEnumerable<Order> ChildrenOf(AccountState s, string parentId)
-        => s.OrderSequence.Select(id => s.Orders[id]).Where(o => o.ParentOrderId == parentId);
+        => s.OpenOrderIds.Select(id => s.Orders[id]).Where(o => o.ParentOrderId == parentId);
 
     /// <summary>Storniert eine Order inkl. Bracket-Folgen.</summary>
     internal static void CancelOrder(DecisionSession s, Order o, string reason, CommandSource source)

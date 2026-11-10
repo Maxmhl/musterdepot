@@ -96,6 +96,8 @@ public sealed record AccountState
     public ImmutableSortedDictionary<string, Order> Orders { get; init; } = ImmutableSortedDictionary.Create<string, Order>(StringComparer.Ordinal);
     /// <summary>Order-IDs in Eingangsreihenfolge.</summary>
     public ImmutableList<string> OrderSequence { get; init; } = [];
+    /// <summary>IDs der offenen Orders in Eingangsreihenfolge (schneller Zugriff bei jedem Marktereignis).</summary>
+    public ImmutableList<string> OpenOrderIds { get; init; } = [];
     public ImmutableSortedDictionary<string, string> ClientOrderIndex { get; init; } = ImmutableSortedDictionary.Create<string, string>(StringComparer.Ordinal);
     /// <summary>Bisher ausgeführtes Volumen je Order in Basiswährung (für kumulative Gebühren).</summary>
     public ImmutableSortedDictionary<string, decimal> OrderFilledNotional { get; init; } = ImmutableSortedDictionary.Create<string, decimal>(StringComparer.Ordinal);
@@ -130,7 +132,7 @@ public sealed record AccountState
 
     public IEnumerable<string> HeldSymbols => Lots.Where(kv => kv.Value.Count > 0).Select(kv => kv.Key);
 
-    public IEnumerable<Order> OpenOrders => OrderSequence.Select(id => Orders[id]).Where(o => o.IsOpen);
+    public IEnumerable<Order> OpenOrders => OpenOrderIds.Select(id => Orders[id]);
 
     /// <summary>Einstand offener Positionen ohne Gebühren.</summary>
     public decimal OpenCost => Lots.Values.SelectMany(l => l).Sum(l => l.Cost);

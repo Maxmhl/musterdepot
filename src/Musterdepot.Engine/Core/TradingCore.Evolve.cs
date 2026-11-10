@@ -114,7 +114,13 @@ public static partial class TradingCore
     }
 
     private static AccountState UpdateOrder(AccountState s, string orderId, Func<Order, Order> update)
-        => s.Orders.TryGetValue(orderId, out var o) ? s with { Orders = s.Orders.SetItem(orderId, update(o)) } : s;
+        => s.Orders.TryGetValue(orderId, out var o) ? SetOrder(s, update(o)) : s;
+
+    private static AccountState SetOrder(AccountState s, Order o)
+    {
+        s = s with { Orders = s.Orders.SetItem(o.OrderId, o) };
+        return !o.IsOpen && s.OpenOrderIds.Contains(o.OrderId) ? s with { OpenOrderIds = s.OpenOrderIds.Remove(o.OrderId) } : s;
+    }
 
     private static AccountState ApplySubmitted(AccountState s, OrderSubmitted os)
     {
@@ -126,6 +132,7 @@ public static partial class TradingCore
         {
             Orders = s.Orders.Add(o.OrderId, o),
             OrderSequence = s.OrderSequence.Add(o.OrderId),
+            OpenOrderIds = o.IsOpen ? s.OpenOrderIds.Add(o.OrderId) : s.OpenOrderIds,
             ClientOrderIndex = s.ClientOrderIndex.SetItem(o.ClientOrderId, o.OrderId),
             RecentSubmissions = recent,
         };
@@ -149,17 +156,14 @@ public static partial class TradingCore
         {
             var newFilled = order.FilledQuantity + f.Quantity;
             var avg = newFilled == 0 ? 0 : Math.Round((order.AveragePrice * order.FilledQuantity + f.Price * f.Quantity) / newFilled, 10, MidpointRounding.AwayFromZero);
-            s = s with
+            s = SetOrder(s, order with
             {
-                Orders = s.Orders.SetItem(order.OrderId, order with
-                {
-                    FilledQuantity = newFilled,
-                    AveragePrice = Money.Normalize(avg),
-                    FeesPaid = order.FeesPaid + f.Fee,
-                    Status = ev.ResultingStatus,
-                    LastUpdateUtc = ts,
-                }),
-            };
+                FilledQuantity = newFilled,
+                AveragePrice = Money.Normalize(avg),
+                FeesPaid = order.FeesPaid + f.Fee,
+                Status = ev.ResultingStatus,
+                LastUpdateUtc = ts,
+            });
         }
         s = s with
         {

@@ -69,7 +69,7 @@ public static partial class TradingCore
         var sym = s.Market.Get(evt.Symbol);
         var delayed = (sym?.IsDelayed ?? false) || evt.DelayedMinutes > 0 || evt.Quality == DataQuality.Delayed;
         s.MakerVolumeUsed = 0;
-        foreach (var id in s.State.OrderSequence.ToList())
+        foreach (var id in s.State.OpenOrderIds.ToList())
         {
             var o = s.State.Orders[id];
             if (!o.IsOpen || o.Symbol != evt.Symbol || !IsActive(s.State, o)) continue;
@@ -272,7 +272,7 @@ public static partial class TradingCore
         foreach (var c in gap.BackfilledCandles.Where(c => c.Symbol == gap.Symbol || string.IsNullOrEmpty(c.Symbol)).OrderBy(c => c.OpenTimeUtc))
         {
             var start = c.OpenTimeUtc;
-            var batch = s.State.OrderSequence.Select(id => s.State.Orders[id])
+            var batch = s.State.OpenOrderIds.Select(id => s.State.Orders[id])
                 .Where(o => o.IsOpen && o.Symbol == gap.Symbol && IsActive(s.State, o) && o.EligibleFromUtc <= start)
                 .Select(o => o.OrderId).ToList();
             var volumeUsed = 0m;
