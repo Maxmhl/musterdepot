@@ -1,0 +1,22 @@
+{
+  "accountId": "golden",
+  "name": "Golden Krypto",
+  "initialCash": 100000,
+  "risk": { "maxOrderNotional": 50000, "maxOrderPercentOfEquity": 50, "maxPositionNotional": 80000, "maxPositionPercentOfEquity": 80, "maxDailyLoss": 5000, "maxDailyLossPercent": 10, "maxOrdersPerMinuteHuman": 30, "maxOrdersPerMinuteAi": 10, "priceBandPercent": 10, "maxOpenOrders": 50, "maxQuoteAge": "00:02:00" },
+  "cryptoFees": { "kind": "Percent", "makerRate": 0.0025, "takerRate": 0.004, "fixedFee": 0 },
+  "steps": [
+    { "$type": "place", "atUtc": "2026-11-10T10:00:01Z", "clientOrderId": "buy-1", "symbol": "BTC/EUR", "side": "Buy", "type": "Market", "quantity": 0.5, "timeInForce": "Gtc", "strategyTag": "s1" },
+    { "$type": "place", "atUtc": "2026-11-10T10:00:30Z", "clientOrderId": "dip", "symbol": "BTC/EUR", "side": "Buy", "type": "Limit", "quantity": 0.2, "limitPrice": 59700, "timeInForce": "Gtc", "strategyTag": "dip" },
+    { "$type": "place", "atUtc": "2026-11-10T10:01:00Z", "clientOrderId": "trail", "symbol": "BTC/EUR", "side": "Sell", "type": "TrailingStop", "quantity": 0.3, "trailPercent": 1.0, "timeInForce": "Gtc", "strategyTag": "s1" },
+    { "$type": "place", "atUtc": "2026-11-10T10:02:00Z", "source": "Ai", "clientName": "claude", "clientOrderId": "claude:br-1", "symbol": "BTC/EUR", "side": "Buy", "type": "Limit", "quantity": 0.1, "limitPrice": 59800, "takeProfitPrice": 60300, "stopLossPrice": 59300, "timeInForce": "Gtc", "strategyTag": "ki" },
+    { "$type": "place", "atUtc": "2026-11-10T10:03:00Z", "clientOrderId": "oco-tp", "symbol": "BTC/EUR", "side": "Sell", "type": "Limit", "quantity": 0.1, "limitPrice": 60400, "ocoGroupId": "x", "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:03:00Z", "clientOrderId": "oco-sl", "symbol": "BTC/EUR", "side": "Sell", "type": "Stop", "quantity": 0.1, "stopPrice": 59400, "ocoGroupId": "x", "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:05:00Z", "source": "Ai", "clientName": "claude", "clientOrderId": "claude:ioc-1", "symbol": "BTC/EUR", "side": "Buy", "type": "Market", "quantity": 0.05, "timeInForce": "Ioc", "strategyTag": "ki" },
+    { "$type": "place", "atUtc": "2026-11-10T10:05:00Z", "clientOrderId": "too-far", "symbol": "BTC/EUR", "side": "Buy", "type": "Limit", "quantity": 0.1, "limitPrice": 50000, "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:20:00Z", "clientOrderId": "sell-1", "symbol": "BTC/EUR", "side": "Sell", "type": "Market", "quantity": 0.1, "timeInForce": "Day" },
+    { "$type": "cancel", "atUtc": "2026-11-10T10:25:00Z", "clientOrderId": "dip" },
+    { "$type": "killswitch", "atUtc": "2026-11-10T10:29:00Z", "source": "Ai", "clientName": "claude", "engage": true, "reason": "KI-Test" },
+    { "$type": "killswitch", "atUtc": "2026-11-10T10:29:30Z", "source": "Ai", "clientName": "claude", "engage": false },
+    { "$type": "killswitch", "atUtc": "2026-11-10T10:29:40Z", "source": "Human", "clientName": "Anwender", "engage": false }
+  ]
+}

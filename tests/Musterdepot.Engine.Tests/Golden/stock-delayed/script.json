@@ -1,0 +1,13 @@
+{
+  "accountId": "golden",
+  "name": "Golden Aktie verzögert",
+  "initialCash": 20000,
+  "risk": { "maxOrderNotional": 10000, "maxOrderPercentOfEquity": 50, "maxPositionNotional": 15000, "maxPositionPercentOfEquity": 80, "maxDailyLoss": 1000, "maxDailyLossPercent": 10, "maxOrdersPerMinuteHuman": 30, "maxOrdersPerMinuteAi": 10, "priceBandPercent": 10, "maxOpenOrders": 50, "maxQuoteAge": "00:02:00" },
+  "stockFees": { "kind": "Fixed", "fixedFee": 1 },
+  "steps": [
+    { "$type": "place", "atUtc": "2026-11-10T10:00:00Z", "clientOrderId": "mkt", "symbol": "DE0007164600", "side": "Buy", "type": "Market", "quantity": 20, "timeInForce": "Day" },
+    { "$type": "place", "atUtc": "2026-11-10T10:00:00Z", "clientOrderId": "lim", "symbol": "DE0007164600", "side": "Buy", "type": "Limit", "quantity": 10, "limitPrice": 180.0, "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:20:00Z", "clientOrderId": "stop", "symbol": "DE0007164600", "side": "Sell", "type": "Stop", "quantity": 10, "stopPrice": 176.5, "ocoGroupId": "exit", "timeInForce": "Gtc" },
+    { "$type": "place", "atUtc": "2026-11-10T10:30:00Z", "clientOrderId": "tp", "symbol": "DE0007164600", "side": "Sell", "type": "Limit", "quantity": 10, "limitPrice": 181, "ocoGroupId": "exit", "timeInForce": "Day" }
+  ]
+}

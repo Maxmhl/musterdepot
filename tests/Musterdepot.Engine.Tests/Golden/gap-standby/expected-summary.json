@@ -1,0 +1,102 @@
+{
+  "stats": {
+    "tradeCount": 2,
+    "wins": 0,
+    "losses": 2,
+    "winRate": 0,
+    "profitFactor": 0,
+    "expectancy": -80.08,
+    "grossProfit": 0,
+    "grossLoss": -160.15,
+    "netPnl": -160.15,
+    "totalFees": 103.51,
+    "feeSharePercent": 84.17,
+    "maxDrawdown": 327.64,
+    "maxDrawdownPercent": 0.33,
+    "averageHoldingTime": "00:34:48",
+    "averageWin": 0,
+    "averageLoss": -80.08
+  },
+  "portfolio": {
+    "accountId": "golden",
+    "baseCurrency": "EUR",
+    "asOfUtc": "2026-11-10T10:36:58+00:00",
+    "cash": 76110.80,
+    "reservedCash": 0,
+    "availableCash": 76110.80,
+    "positionsValue": 23569.40,
+    "equity": 99680.20,
+    "realizedPnl": -160.15,
+    "unrealizedPnl": -159.65,
+    "feesPaid": 103.51,
+    "dayPnl": -319.80,
+    "dayStartEquity": 100000,
+    "killSwitchEngaged": false,
+    "dailyLossLimitHit": false,
+    "positions": [
+      {
+        "symbol": "BTC/EUR",
+        "quantity": 0.4,
+        "averageCost": 59246.825,
+        "costBasis": 23729.05,
+        "lastPrice": 58923.5,
+        "marketValue": 23569.40,
+        "unrealizedPnl": -159.65,
+        "unrealizedPnlPercent": -0.67,
+        "realizedPnl": -160.15,
+        "quoteCurrency": "EUR",
+        "priceIsDelayed": false,
+        "priceAsOfUtc": "2026-11-10T10:36:58+00:00",
+        "lots": [
+          {
+            "lotId": "lot_fill_000004",
+            "symbol": "BTC/EUR",
+            "quantity": 0.1,
+            "price": 59987.3,
+            "costPerUnitBase": 60108.5,
+            "openedUtc": "2026-11-10T10:00:12+00:00",
+            "openingFillId": "fill_000004",
+            "source": "Human"
+          },
+          {
+            "lotId": "lot_fill_000030",
+            "symbol": "BTC/EUR",
+            "quantity": 0.3,
+            "price": 59000,
+            "costPerUnitBase": 59060.6666666667,
+            "openedUtc": "2026-11-10T10:35:00+00:00",
+            "openingFillId": "fill_000030",
+            "source": "Human"
+          }
+        ]
+      }
+    ]
+  },
+  "steps": [
+    {
+      "atUtc": "2026-11-10T10:00:10+00:00",
+      "accepted": true,
+      "orderId": "ord_000002"
+    },
+    {
+      "atUtc": "2026-11-10T10:04:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000011"
+    },
+    {
+      "atUtc": "2026-11-10T10:04:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000013"
+    },
+    {
+      "atUtc": "2026-11-10T10:04:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000015"
+    },
+    {
+      "atUtc": "2026-11-10T10:04:00+00:00",
+      "accepted": true,
+      "orderId": "ord_000017"
+    }
+  ]
+}
