@@ -226,6 +226,8 @@ public sealed partial class SettingsViewModel(
             return;
         }
 
+        // Immer auf dem neuesten Stand aufsetzen (KI-Clients, Limits könnten sich inzwischen geändert haben).
+        if (services.ReadModels?.Settings.Current is { } latest) _current = latest;
         var before = _current;
         var updated = _current with
         {
@@ -301,6 +303,7 @@ public sealed partial class SettingsViewModel(
             return null;
         }
 
+        if (services.ReadModels?.Settings.Current is { } latest) _current = latest;
         string? error = null;
         var risk = _current.Risk with
         {

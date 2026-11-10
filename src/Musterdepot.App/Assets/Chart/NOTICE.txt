@@ -1,0 +1,10 @@
+TradingView Lightweight Charts™ v5.2.1
+Copyright (c) 2026 TradingView, Inc.
+Licensed under the Apache License, Version 2.0 (siehe LICENSE in diesem Ordner).
+https://www.tradingview.com/
+
+Bezugsquelle: npm-Paket "lightweight-charts@5.2.1" (npm pack), Datei dist/lightweight-charts.standalone.production.js unverändert.
+Der Hinweis auf TradingView erscheint im Chart über die Option layout.attributionLogo (Link auf tradingview.com)
+und zusätzlich als Text unter dem Chart.
+
+chart.html und chart.js sind Teil von Musterdepot und nicht Bestandteil der Bibliothek.

@@ -40,6 +40,8 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
     <PackageReference Include="ScottPlot.WPF" Version="5.1.59" />
+    <!-- Abhängigkeit von ScottPlot.WPF; liefert nur ein net462-Assembly, das unter .NET (Windows) läuft (bekannt, von ScottPlot so vorgesehen). -->
+    <PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0" NoWarn="NU1701" />
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
   </ItemGroup>
 
