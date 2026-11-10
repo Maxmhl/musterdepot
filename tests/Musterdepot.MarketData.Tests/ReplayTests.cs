@@ -99,7 +99,7 @@ public class ReplayTests
         await src.LoadAsync(default);
         await src.SubscribeAsync(["ETH/EUR"], default);
         src.RunToEnd();
-        var e = Assert.Single(log.All.Where(x => x is not ConnectionStatusChanged));
+        var e = Assert.Single(log.All, x => x is not ConnectionStatusChanged);
         Assert.Equal("ETH/EUR", e.Symbol);
         Assert.Equal(DataQuality.Replay, e.Quality);
         Assert.Equal("replay", e.Source);

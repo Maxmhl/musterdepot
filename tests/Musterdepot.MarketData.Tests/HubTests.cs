@@ -154,7 +154,7 @@ public class HubTests
 
         // Quellen-Kerzen werden standardmäßig nicht weitergereicht (keine Doppelungen)
         kraken.Emit(new CandleUpdate { Symbol = "BTC/EUR", Source = "kraken", AsOfUtc = T0, Candle = m1 with { Source = "kraken" } });
-        Assert.Single(log.Of<CandleUpdate>().Where(c => c.Candle.IsClosed));
+        Assert.Single(log.Of<CandleUpdate>(), c => c.Candle.IsClosed);
 
         // Zeitablauf schließt die Minute 10:01
         clock.Set(T0.AddSeconds(123));
@@ -320,14 +320,14 @@ public class FakeSourceTests
     }
 
     [Fact]
-    public void BookDeltas_ReconstructFakeBook()
+    public async Task BookDeltas_ReconstructFakeBook()
     {
         var clock = new ManualClock(T0);
         var f = new FakeMarketDataSource(clock, new SeededRandom(5));
         var book = new OrderBookState();
         for (int i = 0; i < 30; i++)
             foreach (var u in f.Step().OfType<OrderBookUpdate>().Where(u => u.Symbol == "BTC/EUR")) book.Apply(u);
-        var expected = f.GetOrderBookAsync("BTC/EUR", 100, default).Result!;
+        var expected = (await f.GetOrderBookAsync("BTC/EUR", 100, default))!;
         Assert.Equal(expected.Bids, book.TopBids(100));
         Assert.Equal(expected.Asks, book.TopAsks(100));
     }
