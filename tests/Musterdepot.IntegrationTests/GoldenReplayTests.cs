@@ -44,15 +44,8 @@ public class GoldenReplayTests
     public void Replay_MoneyIsConserved(string name)
     {
         var (golden, raw) = GoldenReplay.Run(ReplayFixture.Load(name));
-        var p = golden.Portfolio;
-        var account = raw.Engine.GetAccounts().Single();
-        // Cash = Summe aller Kontobuchungen.
-        Assert.Equal(raw.Engine.GetCashEntries(account.AccountId).Sum(c => c.Amount), p.Cash);
-        // Cash = Startkapital − Käufe + Verkäufe − Gebühren (Fills in EUR, FxRate 1).
-        var flows = golden.Fills.Sum(f => (f.Side == OrderSide.Buy ? -1 : 1) * f.Quantity * f.Price * f.FxRate - f.Fee);
-        Assert.Equal(account.InitialCash + flows, p.Cash, 2);
-        Assert.Equal(golden.Fills.Sum(f => f.Fee), p.FeesPaid, 2);
-        Assert.All(p.Positions, pos => Assert.True(pos.Quantity >= 0));
+        Invariants.CheckAccount(raw.Engine, golden.Portfolio.AccountId);
+        Invariants.CheckRiskGate(golden.Events, t => null);
     }
 
     [Fact]
