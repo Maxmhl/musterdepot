@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Musterdepot.Core.Abstractions;
 using Musterdepot.Core.Commands;
+using Musterdepot.Core.Domain;
 using Musterdepot.Core.ReadModels;
 
 namespace Musterdepot.Commands;
@@ -21,6 +22,15 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IIdGenerator, GuidIdGenerator>();
         services.TryAddSingleton<IUserNotifier>(NullUserNotifier.Instance);
 
+        // Alle Schreibzugriffe auf die Einstellungen (auch von MCP-TokenService oder App über ISettingsStore)
+        // laufen durch den SettingsService, damit Cache und Changed-Ereignis stimmen.
+        var inner = services.LastOrDefault(d => d.ServiceType == typeof(ISettingsStore));
+        if (inner is not null && inner.ImplementationType != typeof(SettingsStoreAdapter))
+        {
+            services.Remove(inner);
+            services.TryAddSingleton(sp => new SettingsService(CreateFromDescriptor<ISettingsStore>(sp, inner)));
+            services.AddSingleton<ISettingsStore, SettingsStoreAdapter>();
+        }
         services.TryAddSingleton<SettingsService>();
         services.TryAddSingleton<StoreChangeNotifier>();
         services.TryAddSingleton<ClientActivityTracker>();
@@ -46,4 +56,19 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IMusterdepotRuntime>(sp => sp.GetRequiredService<MusterdepotRuntime>());
         return services;
     }
+
+    private static T CreateFromDescriptor<T>(IServiceProvider sp, ServiceDescriptor d) where T : class
+    {
+        if (d.ImplementationInstance is T instance) return instance;
+        if (d.ImplementationFactory is not null) return (T)d.ImplementationFactory(sp);
+        if (d.ImplementationType is not null) return (T)ActivatorUtilities.CreateInstance(sp, d.ImplementationType);
+        throw new InvalidOperationException($"ISettingsStore-Registrierung {d} kann nicht aufgelöst werden.");
+    }
+}
+
+/// <summary>ISettingsStore, der über den <see cref="SettingsService"/> (Cache + Changed) läuft.</summary>
+public sealed class SettingsStoreAdapter(SettingsService settings) : ISettingsStore
+{
+    public Task<AppSettings> LoadAsync(CancellationToken ct = default) => Task.FromResult(settings.Current);
+    public Task SaveAsync(AppSettings settings1, CancellationToken ct = default) => settings.SaveAsync(settings1, ct);
 }
