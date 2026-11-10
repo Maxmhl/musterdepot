@@ -11,7 +11,7 @@ using Musterdepot.Recorder.Cli;
 namespace Musterdepot.Recorder.Recording;
 
 /// <summary>
-/// <c>record --symbols BTC/EUR,ETH/EUR [--minutes 60] [--out pfad.jsonl.gz] [--sources kraken,bitvavo] [--no-rotate] [--verbose]</c>
+/// <c>record --symbols BTC/EUR,ETH/EUR [--minutes 60] [--seconds 30] [--out pfad.jsonl.gz] [--sources kraken,bitvavo] [--no-rotate] [--verbose]</c>
 /// </summary>
 public static class RecordCommand
 {
@@ -20,11 +20,13 @@ public static class RecordCommand
 
     public static async Task<int> RunAsync(CliArgs args, CancellationToken ct)
     {
-        args.EnsureOnly("symbols", "minutes", "out", "sources", "no-rotate", "verbose");
+        args.EnsureOnly("symbols", "minutes", "seconds", "out", "sources", "no-rotate", "verbose");
         var symbols = args.GetList("symbols");
         if (symbols.Count == 0) throw new CliException("Option --symbols fehlt (z. B. --symbols BTC/EUR,ETH/EUR).");
         var minutes = args.GetInt("minutes", 0);
-        if (minutes < 0) throw new CliException("--minutes muss >= 0 sein (0 = bis Strg+C).");
+        var seconds = args.GetInt("seconds", 0);
+        if (minutes < 0 || seconds < 0) throw new CliException("--minutes/--seconds müssen >= 0 sein (0 = bis Strg+C).");
+        var duration = TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds);
         var sources = args.Has("sources") ? args.GetList("sources") : ["kraken", "bitvavo"];
         var settings = BuildSettings(sources);
         var rotate = !args.Has("no-rotate");
@@ -59,7 +61,7 @@ public static class RecordCommand
         };
 
         using var stopCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        if (minutes > 0) stopCts.CancelAfter(TimeSpan.FromMinutes(minutes));
+        if (duration > TimeSpan.Zero) stopCts.CancelAfter(duration);
 
         var counts = new SortedDictionary<string, long>(StringComparer.Ordinal);
         await using var writer = new RotatingRecordingWriter(outPath, rotate, clock);
@@ -87,7 +89,7 @@ public static class RecordCommand
         });
 
         Console.WriteLine($"Aufzeichnung: {string.Join(", ", symbols)} von {string.Join(", ", sources)}" +
-                          (minutes > 0 ? $" für {minutes} Min." : " bis Strg+C") +
+                          (duration > TimeSpan.Zero ? $" für {duration:c}" : " bis Strg+C") +
                           $" → {(rotate ? RotatingRecordingWriter.PathForHour(outPath, clock.UtcNow) + " (stündlich rotiert)" : outPath)}");
 
         hub.EventReceived += handler;
@@ -100,7 +102,7 @@ public static class RecordCommand
         }
         catch (OperationCanceledException) when (stopCts.IsCancellationRequested)
         {
-            // Ende durch Strg+C oder --minutes.
+            // Ende durch Strg+C oder --minutes/--seconds.
         }
         catch (Exception ex)
         {
