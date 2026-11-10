@@ -1,0 +1,260 @@
+<UserControl x:Class="Musterdepot.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Musterdepot.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}">
+    <DockPanel>
+        <!-- Rückmeldung -->
+        <Border DockPanel.Dock="Bottom" Margin="0,8,0,0" Padding="12,6" CornerRadius="6"
+                Visibility="{Binding StatusMessage, Converter={StaticResource NullToVis}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="{DynamicResource App.InfoBackground}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding StatusIsError}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource App.DangerBackground}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Foreground="{DynamicResource App.Text}" />
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <WrapPanel Orientation="Horizontal" ItemWidth="540">
+
+                <!-- KI-Clients und Tokens -->
+                <Border Style="{StaticResource Card}" Margin="0,0,16,16">
+                    <StackPanel>
+                        <TextBlock Text="KI-Clients (MCP)" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Style="{StaticResource Caption}"
+                                   Text="Jeder KI-Client bekommt ein eigenes Token. Modus und Rechte lassen sich nur hier ändern – nie von der KI selbst." />
+                        <TextBlock Style="{StaticResource Caption}" Foreground="{DynamicResource App.Negative}" Margin="0,4,0,0"
+                                   Text="Token-Dienst nicht verfügbar."
+                                   Visibility="{Binding TokensAvailable, Converter={StaticResource InverseBoolToVis}}" />
+
+                        <ItemsControl ItemsSource="{Binding Clients}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:ClientRowViewModel}">
+                                    <Border BorderBrush="{DynamicResource App.Border}" BorderThickness="0,0,0,1" Padding="0,8">
+                                        <StackPanel>
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right" Style="{StaticResource LinkButton}" Content="Token widerrufen"
+                                                        Foreground="{DynamicResource App.Negative}"
+                                                        Command="{Binding DataContext.RevokeClientCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}" />
+                                                <TextBlock FontWeight="SemiBold">
+                                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                                    <Run Text="{Binding ClientId, Mode=OneWay}" Foreground="{DynamicResource App.TextSecondary}" FontWeight="Normal" FontSize="11" />
+                                                </TextBlock>
+                                            </DockPanel>
+                                            <WrapPanel Margin="0,4,0,0">
+                                                <RadioButton Content="read_only" Margin="0,0,12,0"
+                                                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=ReadOnly}"
+                                                             ToolTip="Nur lesen, keine Orders" />
+                                                <RadioButton Content="confirm" Margin="0,0,12,0"
+                                                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=Confirm}"
+                                                             ToolTip="Jede Schreibaktion braucht Ihre Freigabe (Benachrichtigung)" />
+                                                <RadioButton Content="autonomous"
+                                                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=Autonomous}"
+                                                             ToolTip="Handelt ohne Rückfrage innerhalb der harten Limits" />
+                                            </WrapPanel>
+                                            <WrapPanel Margin="0,4,0,0">
+                                                <CheckBox Content="lesen" IsChecked="{Binding CanRead}" Margin="0,0,12,0" />
+                                                <CheckBox Content="handeln" IsChecked="{Binding CanTrade}" Margin="0,0,12,0" />
+                                                <CheckBox Content="Einstellungen" IsChecked="{Binding CanChangeSettings}" Margin="0,0,12,0" />
+                                                <Button Content="Übernehmen" Style="{StaticResource PrimaryButton}" Padding="12,3"
+                                                        Visibility="{Binding IsDirty, Converter={StaticResource BoolToVis}}"
+                                                        Command="{Binding DataContext.ApplyClientModeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="Neuen KI-Client anlegen" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+                        <TextBlock Text="Name" Style="{StaticResource FieldLabel}" Margin="0,0,0,3" />
+                        <TextBox Text="{Binding NewClientName, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="Modus" Style="{StaticResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding NewClientMode}" DisplayMemberPath="Label" />
+                        <WrapPanel Margin="0,8,0,0">
+                            <CheckBox Content="lesen" IsChecked="{Binding NewClientRead}" Margin="0,0,12,0" />
+                            <CheckBox Content="handeln" IsChecked="{Binding NewClientTrade}" Margin="0,0,12,0" />
+                            <CheckBox Content="Einstellungen" IsChecked="{Binding NewClientSettings}" />
+                        </WrapPanel>
+                        <Button Content="Token erzeugen" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,10,0,0"
+                                Command="{Binding CreateClientCommand}" />
+
+                        <!-- Token einmalig anzeigen -->
+                        <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0"
+                                Visibility="{Binding CreatedToken, Converter={StaticResource NullToVis}}">
+                            <StackPanel>
+                                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource App.Warning}" FontWeight="SemiBold">
+                                    <Run Text="Token für" /> <Run Text="{Binding CreatedClientName, Mode=OneWay}" />
+                                    <Run Text="– wird nur jetzt angezeigt. Wie ein Passwort behandeln." />
+                                </TextBlock>
+                                <TextBox Text="{Binding CreatedToken, Mode=OneWay}" IsReadOnly="True" Margin="0,6,0,0"
+                                         FontFamily="Cascadia Mono, Consolas" />
+                                <Button Content="Token kopieren" Command="{Binding CopyTokenCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+
+                                <TextBlock Text="Claude Code – im Terminal ausführen:" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding ClaudeCommand, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                         FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+                                <Button Content="Befehl kopieren" Command="{Binding CopyClaudeCommandCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+
+                                <TextBlock Text="LM Studio / andere Clients (mcp.json):" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding McpJsonSnippet, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
+                                         FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <Button Content="mcp.json kopieren" Command="{Binding CopyMcpJsonCommand}" Margin="0,0,8,0" />
+                                    <Button Content="Fertig – Token ausblenden" Command="{Binding DismissTokenCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Limits -->
+                <Border Style="{StaticResource Card}" Margin="0,0,16,16">
+                    <StackPanel>
+                        <TextBlock Text="Risiko-Limits" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Gelten vor jeder Order – für Mensch und KI. Leer = unbegrenzt. Nur hier änderbar." />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Max. Ordergröße (EUR)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxOrderNotional, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Max. Positionsgröße (EUR)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxPositionNotional, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Max. Tagesverlust (EUR)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxDailyLoss, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Orders pro Minute – Mensch" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxOrdersPerMinuteHuman, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Max. offene Orders" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxOpenOrders, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Max. Ordergröße (% Depot)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxOrderPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Max. Positionsgröße (% Depot)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxPositionPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Max. Tagesverlust (%)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxDailyLossPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Orders pro Minute – KI" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding MaxOrdersPerMinuteAi, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Preisband gegen Tippfehler (%)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding PriceBandPercent, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="Erlaubte Symbole (Komma-getrennt, leer = alle)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding AllowedSymbols, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0"
+                                   Text="Nach Erreichen des Tagesverlusts: nur noch reduzierende Orders, KI-Clients automatisch read_only." />
+                        <Button Content="Limits speichern" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,12,0,0"
+                                Command="{Binding SaveRiskCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Allgemein: Datenquellen, MCP, Betrieb -->
+                <Border Style="{StaticResource Card}" Margin="0,0,16,16">
+                    <StackPanel>
+                        <TextBlock Text="Datenquellen" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Änderungen wirken nach einem Neustart des Programms." />
+                        <CheckBox Content="Kraken (Krypto, Echtzeit – Hauptquelle)" IsChecked="{Binding KrakenEnabled}" Margin="0,8,0,0" />
+                        <CheckBox Content="Bitvavo (Krypto, Historie + Ausweichquelle)" IsChecked="{Binding BitvavoEnabled}" Margin="0,4,0,0" />
+                        <CheckBox Content="Coinbase Exchange (Krypto, Ausweichquelle)" IsChecked="{Binding CoinbaseEnabled}" Margin="0,4,0,0" />
+                        <CheckBox Content="gettex (Aktien, bis 15 Min verzögert)" IsChecked="{Binding GettexEnabled}" Margin="0,4,0,0" />
+                        <CheckBox Content="Cboe Europe (Aktien, verzögert, ungeprüft)" IsChecked="{Binding CboeEnabled}" Margin="0,4,0,0" />
+                        <CheckBox Content="EZB-Referenzkurse (EUR/USD)" IsChecked="{Binding EcbEnabled}" Margin="0,4,0,0" />
+                        <CheckBox Content="Fake-Modus: simulierte Kurse statt echter Quellen (Übung, offline)" IsChecked="{Binding UseFakeData}" Margin="0,8,0,0"
+                                  FontWeight="SemiBold" />
+
+                        <TextBlock Text="MCP-Server" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+                        <CheckBox Content="MCP-Server aktiv (nur 127.0.0.1)" IsChecked="{Binding McpEnabled}" />
+                        <TextBlock Text="Port" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding McpPort, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0">
+                            <Run Text="Status:" /> <Run Text="{Binding Runtime.McpStatus, Mode=OneWay}" />
+                        </TextBlock>
+
+                        <TextBlock Text="Betrieb" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+                        <CheckBox Content="Mit Windows starten (im Infobereich, ohne Adminrechte)" IsChecked="{Binding AutostartEnabled}" />
+                        <CheckBox Content="Schließen minimiert in den Infobereich (Daten laufen weiter)" IsChecked="{Binding MinimizeToTray}" Margin="0,4,0,0" />
+                        <TextBlock Text="Darstellung" Style="{StaticResource FieldLabel}" />
+                        <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}" DisplayMemberPath="Label" Width="200" HorizontalAlignment="Left" />
+
+                        <TextBlock Text="Gebühren" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Krypto" FontWeight="SemiBold" />
+                                <ComboBox ItemsSource="{Binding FeeKinds}" SelectedItem="{Binding CryptoFeeKind}" DisplayMemberPath="Label" Margin="0,4,0,0" />
+                                <TextBlock Text="Fest je Order (EUR)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding CryptoFixedFee, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Maker (%)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding CryptoMakerPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Taker (%)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding CryptoTakerPercent, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Aktien" FontWeight="SemiBold" />
+                                <ComboBox ItemsSource="{Binding FeeKinds}" SelectedItem="{Binding StockFeeKind}" DisplayMemberPath="Label" Margin="0,4,0,0" />
+                                <TextBlock Text="Fest je Order (EUR)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding StockFixedFee, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Maker (%)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding StockMakerPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="Taker (%)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding StockTakerPercent, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Startkapital (EUR)" Style="{StaticResource FieldLabel}" Margin="0,16,0,3" />
+                        <TextBox Text="{Binding InitialCash, UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Left" />
+
+                        <Button Content="Einstellungen speichern" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,16,0,0"
+                                Command="{Binding SaveGeneralCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Spielgeld und Daten -->
+                <Border Style="{StaticResource Card}" Margin="0,0,16,16">
+                    <StackPanel>
+                        <TextBlock Text="Spielgeld einzahlen" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Paper Trading – es wird kein echtes Geld bewegt. Einzahlungen erhöhen nur das simulierte Cash." />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBox Text="{Binding DepositAmount, UpdateSourceTrigger=PropertyChanged}" Width="160" ToolTip="Betrag in EUR" />
+                            <Button Content="Einzahlen" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Command="{Binding DepositCommand}" />
+                        </StackPanel>
+
+                        <TextBlock Text="Daten und Protokolle" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+                        <TextBlock Style="{StaticResource Caption}">
+                            <Run Text="Datenordner:" /> <Run Text="{Binding DataDirectory, Mode=OneWay}" />
+                        </TextBlock>
+                        <Button Content="Protokollordner öffnen" Command="{Binding OpenLogsCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+
+                        <TextBlock Text="Risiken" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+                        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap">
+                            <Run Text="• Aktienkurse sind ohne Anmeldung 15–30 Min verzögert; Aktien-Orders werden synthetisch ausgeführt." /><LineBreak />
+                            <Run Text="• Nach Standby werden verpasste Kerzen nachgeladen; Fills daraus tragen „während Lücke“." /><LineBreak />
+                            <Run Text="• Ohne frische Daten werden Market-Orders abgelehnt." /><LineBreak />
+                            <Run Text="• Ergebnisse im Paper Trading sind keine Garantie für echten Handel." />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

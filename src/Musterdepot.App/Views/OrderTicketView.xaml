@@ -1,0 +1,200 @@
+<UserControl x:Class="Musterdepot.App.Views.OrderTicketView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Musterdepot.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:OrderTicketViewModel}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid MaxWidth="1100" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="480" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" MinWidth="340" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Eingabe -->
+            <Border Style="{StaticResource Card}" VerticalAlignment="Top">
+                <StackPanel>
+                    <TextBlock Text="Order erfassen" Style="{StaticResource SectionTitle}" />
+
+                    <TextBlock Text="Symbol" Style="{StaticResource FieldLabel}" Margin="0,0,0,3" />
+                    <TextBox Text="{Binding Symbol, UpdateSourceTrigger=PropertyChanged, Delay=300}" FontSize="15"
+                             ToolTip="z. B. BTC/EUR oder ISIN – Auswahl auch über Watchlist/Chart" />
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Border Style="{StaticResource DelayedBadge}" Margin="0,0,8,0"
+                                Visibility="{Binding QuoteDelayBadge, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding QuoteDelayBadge}" Style="{StaticResource DelayedBadgeText}" />
+                        </Border>
+                        <TextBlock Text="{Binding QuoteInfo}" Style="{StaticResource Caption}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Kauf / Verkauf -->
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <RadioButton GroupName="Side" Content="Kaufen" IsChecked="{Binding IsBuy}" FontWeight="SemiBold" />
+                        <RadioButton Grid.Column="2" GroupName="Side" Content="Verkaufen" FontWeight="SemiBold"
+                                     IsChecked="{Binding IsBuy, Converter={StaticResource EnumEquals}, ConverterParameter=False}" />
+                    </Grid>
+
+                    <TextBlock Text="Ordertyp" Style="{StaticResource FieldLabel}" />
+                    <ComboBox ItemsSource="{Binding OrderTypes}" SelectedItem="{Binding SelectedType}" DisplayMemberPath="Label" />
+
+                    <!-- Menge oder Betrag -->
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <RadioButton GroupName="Size" Content="Stückzahl" Margin="0,0,16,0"
+                                     IsChecked="{Binding UseNotional, Converter={StaticResource EnumEquals}, ConverterParameter=False}" />
+                        <RadioButton GroupName="Size" Content="Betrag in EUR" IsChecked="{Binding UseNotional}" />
+                    </StackPanel>
+                    <TextBox Margin="0,6,0,0" Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding UseNotional, Converter={StaticResource InverseBoolToVis}}" ToolTip="Stückzahl (Krypto mit Nachkommastellen)" />
+                    <TextBox Margin="0,6,0,0" Text="{Binding NotionalText, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding UseNotional, Converter={StaticResource BoolToVis}}" ToolTip="Betrag in EUR – Stückzahl wird berechnet" />
+
+                    <StackPanel Visibility="{Binding NeedsLimit, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Limitpreis" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding LimitText, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Visibility="{Binding NeedsStop, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Stoppreis (Auslöser: letzter Trade)" Style="{StaticResource FieldLabel}" />
+                        <TextBox Text="{Binding StopText, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <TextBlock Text="Gültigkeit" Style="{StaticResource FieldLabel}" />
+                    <ComboBox ItemsSource="{Binding TimeInForces}" SelectedItem="{Binding SelectedTif}" DisplayMemberPath="Label" />
+
+                    <TextBlock Text="Strategie-Tag (optional)" Style="{StaticResource FieldLabel}" />
+                    <TextBox Text="{Binding StrategyTag, UpdateSourceTrigger=PropertyChanged}" ToolTip="z. B. breakout, scalping – für Statistik je Strategie" />
+
+                    <!-- Erweitert: Trailing und Bracket -->
+                    <Expander Header="Erweitert: Trailing-Stop, Bracket (Take-Profit / Stop-Loss)" Margin="0,14,0,0"
+                              IsExpanded="{Binding ShowAdvanced}">
+                        <StackPanel Margin="0,6,0,0">
+                            <StackPanel Visibility="{Binding IsTrailing, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Trailing-Abstand (Preiseinheiten)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding TrailAmountText, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="oder Trailing-Abstand in %" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding TrailPercentText, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <TextBlock Text="Für Trailing-Stop oben den Ordertyp „Trailing-Stop“ wählen." Style="{StaticResource Caption}"
+                                       Visibility="{Binding IsTrailing, Converter={StaticResource InverseBoolToVis}}" />
+                            <CheckBox Content="Bracket: nach dem Einstieg automatisch Take-Profit und Stop-Loss setzen" Margin="0,10,0,0"
+                                      IsChecked="{Binding UseBracket}" />
+                            <Grid Visibility="{Binding UseBracket, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Take-Profit (Limit)" Style="{StaticResource FieldLabel}" />
+                                    <TextBox Text="{Binding TakeProfitText, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Stop-Loss (Stop)" Style="{StaticResource FieldLabel}" />
+                                    <TextBox Text="{Binding StopLossText, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                        <Button Command="{Binding SubmitCommand}" MinWidth="220">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource PositiveButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsBuy}" Value="False">
+                                            <Setter Property="Background" Value="#C62828" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="{Binding SubmitLabel}" />
+                        </Button>
+                        <Button Content="Leeren" Command="{Binding ClearCommand}" Margin="8,0,0,0" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding StatusMessage}" Margin="0,10,0,0" TextWrapping="Wrap"
+                               Visibility="{Binding StatusMessage, Converter={StaticResource NullToVis}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource BodyText}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusIsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource App.Negative}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Vorschau -->
+            <StackPanel Grid.Column="2">
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <DockPanel>
+                            <ProgressBar DockPanel.Dock="Right" IsIndeterminate="True" Width="60" Height="3" VerticalAlignment="Center"
+                                         Visibility="{Binding IsPreviewing, Converter={StaticResource BoolToVis}}" />
+                            <TextBlock Text="Vorschau mit Gebühren" Style="{StaticResource SectionTitle}" />
+                        </DockPanel>
+                        <TextBlock Style="{StaticResource Caption}" Text="Wird beim Tippen über die Befehlsschicht (dry_run) berechnet – mit Risikoprüfung, ohne Order." />
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Stückzahl" Style="{StaticResource Caption}" Margin="0,4" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PreviewQuantity}" FontWeight="SemiBold" Margin="0,4" />
+                            <TextBlock Grid.Row="1" Text="Geschätzter Preis" Style="{StaticResource Caption}" Margin="0,4" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PreviewPrice}" FontWeight="SemiBold" Margin="0,4" />
+                            <TextBlock Grid.Row="2" Text="Ordervolumen" Style="{StaticResource Caption}" Margin="0,4" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PreviewNotional}" FontWeight="SemiBold" Margin="0,4" />
+                            <TextBlock Grid.Row="3" Text="Gebühr" Style="{StaticResource Caption}" Margin="0,4" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding PreviewFee}" FontWeight="SemiBold" FontSize="16" Margin="0,4" />
+                            <TextBlock Grid.Row="4" Text="Cash danach" Style="{StaticResource Caption}" Margin="0,4" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PreviewCashAfter}" FontWeight="SemiBold" Margin="0,4" />
+                        </Grid>
+                        <Border Style="{StaticResource DangerBanner}" Margin="0,12,0,0"
+                                Visibility="{Binding PreviewError, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="{Binding PreviewError}" TextWrapping="Wrap" Foreground="{DynamicResource App.Danger}" />
+                        </Border>
+                        <Border Style="{StaticResource InfoBanner}" Margin="0,12,0,0"
+                                Visibility="{Binding PreviewOk, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Risikoprüfung bestanden – die Order würde angenommen." TextWrapping="Wrap" Foreground="{DynamicResource App.Info}" />
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding PreviewWarnings}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource WarningBanner}" Margin="0,4,0,0">
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Foreground="{DynamicResource App.Warning}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="So wird simuliert" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap">
+                            <Run Text="• Market: Krypto läuft Stufe für Stufe durch das Orderbuch (Teilausführungen möglich)." /><LineBreak />
+                            <Run Text="• Limit: füllt erst, wenn ein echter Trade durch das Limit geht, gedeckelt auf einen Anteil des Volumens." /><LineBreak />
+                            <Run Text="• Stop: ausgelöst durch den letzten Trade, bei Kurssprung zum ersten verfügbaren Kurs." /><LineBreak />
+                            <Run Text="• Aktien (verzögert): nur Trades nach Ordereingang, angenommener Spread, Fill-Qualität SYNTHETIC." /><LineBreak />
+                            <Run Text="• Paper Trading – es wird kein echtes Geld bewegt." />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,51 @@
+<Window x:Class="Musterdepot.App.Views.ApprovalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Musterdepot.App.ViewModels"
+        xmlns:svc="clr-namespace:Musterdepot.App.Services"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=svc:ApprovalPopupService}"
+        Title="Musterdepot – Freigabe nötig"
+        Icon="pack://application:,,,/Musterdepot;component/Assets/app.ico"
+        Width="440" SizeToContent="Height" MaxHeight="640"
+        Topmost="True" ShowInTaskbar="True" ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        Background="{DynamicResource App.Surface}" Foreground="{DynamicResource App.Text}">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <TextBlock Text="Eine KI möchte handeln" FontSize="16" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Caption}"
+                       Text="Der Client ist im Modus „confirm“. Ohne Entscheidung verfällt die Anfrage. Paper Trading – kein echtes Geld." />
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Pending}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:ApprovalItemViewModel}">
+                        <Border BorderBrush="{DynamicResource App.WarningBorder}" Background="{DynamicResource App.WarningBackground}"
+                                BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption}">
+                                    <Run Text="{Binding Created, Mode=OneWay}" />
+                                    <Run Text="·" />
+                                    <Run Text="{Binding ClientName, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text="·" />
+                                    <Run Text="{Binding CommandName, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" FontSize="14" FontWeight="SemiBold" Margin="0,4,0,10"
+                                           Foreground="{DynamicResource App.Text}" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Erlauben" Style="{StaticResource PositiveButton}" MinWidth="110" Margin="0,0,8,0"
+                                            Command="{Binding ApproveCommand}" />
+                                    <Button Content="Ablehnen" Style="{StaticResource DangerButton}" MinWidth="110"
+                                            Command="{Binding DenyCommand}" IsDefault="True" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nur lokale Skripte, keine Netzwerkzugriffe. -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';" />
+    <title>Musterdepot Chart</title>
+    <style>
+        :root { --bg: #ffffff; --text: #1b1f24; --muted: #5b6370; --warn-bg: #fff1d6; --warn: #8a5300; }
+        :root.dark { --bg: #1f2227; --text: #e6e8eb; --muted: #a0a7b1; --warn-bg: #3a2e14; --warn: #ffc764; }
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
+                     font-family: "Segoe UI Variable", "Segoe UI", sans-serif; font-size: 12px; }
+        #chart { position: absolute; inset: 0; }
+        #legend { position: absolute; top: 8px; left: 12px; z-index: 3; pointer-events: none; line-height: 1.5; }
+        #legend .title { font-size: 14px; font-weight: 600; }
+        #legend .item { margin-right: 10px; white-space: nowrap; }
+        #legend .notice { display: inline-block; margin-left: 8px; padding: 0 6px; border-radius: 4px;
+                          background: var(--warn-bg); color: var(--warn); font-weight: 600; font-size: 11px; }
+        #status { position: absolute; top: 50%; left: 0; right: 0; text-align: center; color: var(--muted);
+                  font-size: 14px; z-index: 2; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="chart"></div>
+    <div id="legend"></div>
+    <div id="status">Chart wird geladen …</div>
+    <script src="lightweight-charts.standalone.production.js"></script>
+    <script src="chart.js"></script>
+</body>
+</html>
