@@ -33,7 +33,7 @@ public sealed class RecordingStats
     public SortedDictionary<string, long> BySource { get; } = new(StringComparer.Ordinal);
     public SortedDictionary<string, long> ByQuality { get; } = new(StringComparer.Ordinal);
     public SortedDictionary<string, long> ByDelayedMinutes { get; } = new(StringComparer.Ordinal);
-    /// <summary>AsOfUtc springt je Symbol zurück (ohne Status-Ereignisse "*").</summary>
+    /// <summary>AsOfUtc springt je Symbol zurück (ohne Status-Ereignisse "*" und ohne abgeschlossene Kerzen).</summary>
     public long AsOfOutOfOrder { get; private set; }
     /// <summary>ReceivedUtc springt über die ganze Datei zurück.</summary>
     public long ReceivedOutOfOrder { get; private set; }
@@ -74,7 +74,9 @@ public sealed class RecordingStats
         {
             if (_lastAsOfBySymbol.TryGetValue(e.Symbol, out var prev))
             {
-                if (e.AsOfUtc < prev) AsOfOutOfOrder++;
+                // Eine abgeschlossene Kerze trägt das Periodenende als AsOf und folgt dem Trade, der die Periode
+                // beendet hat (so meldet es der Hub) – das ist kein Rücksprung.
+                if (e.AsOfUtc < prev) { if (e is not CandleUpdate { Candle.IsClosed: true }) AsOfOutOfOrder++; }
                 else if (e.AsOfUtc - prev > _silenceThreshold && e is not GapDetected)
                     Gaps.Add(new RecordingGap(e.Symbol, "silence", prev, e.AsOfUtc, (e.AsOfUtc - prev).TotalSeconds));
             }

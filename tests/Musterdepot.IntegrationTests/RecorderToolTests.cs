@@ -121,6 +121,22 @@ public class RecorderToolTests
     }
 
     [Fact]
+    public void Inspect_ClosedCandleAfterClosingTrade_IsNoRewind()
+    {
+        var minute = new DateTimeOffset(2026, 11, 9, 10, 0, 0, TimeSpan.Zero);
+        var stats = new RecordingStats(TimeSpan.FromSeconds(60));
+        stats.Add(new TradeTick { Symbol = "BTC/EUR", Source = "fake", AsOfUtc = minute.AddMinutes(1).AddMilliseconds(100), Price = 1m, Quantity = 1m });
+        stats.Add(new CandleUpdate
+        {
+            Symbol = "BTC/EUR", Source = "fake", AsOfUtc = minute.AddMinutes(1),
+            Candle = new Core.Domain.Candle { Symbol = "BTC/EUR", Timeframe = Core.Domain.Timeframe.M1, OpenTimeUtc = minute, Open = 1, High = 1, Low = 1, Close = 1 },
+        });
+        Assert.Equal(0, stats.AsOfOutOfOrder);
+        stats.Add(new QuoteTick { Symbol = "BTC/EUR", Source = "fake", AsOfUtc = minute, Last = 1m });
+        Assert.Equal(1, stats.AsOfOutOfOrder);
+    }
+
+    [Fact]
     public async Task Inspect_ToleratesBrokenLinesAndTruncatedGzip()
     {
         var dir = TestPaths.NewTempDirectory();
