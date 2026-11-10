@@ -1,0 +1,177 @@
+<Window x:Class="Musterdepot.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Musterdepot.App.ViewModels"
+        xmlns:views="clr-namespace:Musterdepot.App.Views"
+        xmlns:svc="clr-namespace:Musterdepot.App.Services"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="Musterdepot – Paper Trading"
+        Icon="pack://application:,,,/Musterdepot;component/Assets/app.ico"
+        Width="1360" Height="860" MinWidth="1000" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource App.Background}"
+        Foreground="{DynamicResource App.Text}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="232" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Navigation links -->
+        <Border Grid.Column="0" Grid.RowSpan="2" Background="{DynamicResource App.NavBackground}"
+                BorderBrush="{DynamicResource App.Border}" BorderThickness="0,0,1,0">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top" Margin="20,20,20,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="pack://application:,,,/Musterdepot;component/Assets/app.ico" Width="28" Height="28" Margin="0,0,10,0" />
+                        <TextBlock Text="Musterdepot" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource App.Text}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource NeutralBadge}" Margin="0,10,0,0" ToolTip="Alle Orders sind simuliert. Es wird kein echtes Geld bewegt.">
+                        <TextBlock Text="Paper Trading – kein echtes Geld" FontSize="11" Foreground="{DynamicResource App.TextSecondary}" />
+                    </Border>
+                </StackPanel>
+
+                <!-- Not-Aus-Zustand und Freigaben unten in der Navigation -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,16">
+                    <Border Style="{StaticResource DangerBanner}" Margin="0,0,0,8"
+                            Visibility="{Binding KillSwitchEngaged, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="NOT-AUS AKTIV" FontWeight="Bold" Foreground="{DynamicResource App.Danger}" />
+                            <TextBlock Text="Keine neuen Orders. Lösen unter „KI-Aktivität“." Style="{StaticResource Caption}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,8"
+                            Visibility="{Binding DailyLossLimitHit, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Tagesverlust-Grenze erreicht: nur noch reduzierende Orders." Style="{StaticResource Caption}"
+                                   Foreground="{DynamicResource App.Warning}" />
+                    </Border>
+                    <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Stretch"
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static svc:AppPage.AiActivity}"
+                            Visibility="{Binding PendingApprovalCount, Converter={StaticResource PositiveToVis}}">
+                        <TextBlock>
+                            <Run Text="{Binding PendingApprovalCount, Mode=OneWay}" />
+                            <Run Text=" Freigabe(n) offen" />
+                        </TextBlock>
+                    </Button>
+                </StackPanel>
+
+                <ListBox Style="{StaticResource NavList}" ItemsSource="{Binding Pages}" SelectedItem="{Binding SelectedPage}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:PageViewModel}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Glyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16"
+                                           Width="28" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Title}" FontSize="14" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- Inhalt -->
+        <DockPanel Grid.Column="1" Grid.Row="0" LastChildFill="True">
+            <!-- Kopfzeile -->
+            <Border DockPanel.Dock="Top" Background="{DynamicResource App.Surface}" BorderBrush="{DynamicResource App.Border}"
+                    BorderThickness="0,0,0,1" Padding="24,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedPage.Title}" Style="{StaticResource PageTitle}" Margin="0" />
+                        <TextBlock Style="{StaticResource Caption}"
+                                   Text="Simuliertes Depot. Krypto in Echtzeit, Aktien 15–30 Min verzögert (gettex)." />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="24,0" VerticalAlignment="Center">
+                        <TextBlock Text="Depotwert" Style="{StaticResource Caption}" />
+                        <TextBlock Text="{Binding Equity}" Style="{StaticResource KpiValue}" FontSize="18" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="24,0" VerticalAlignment="Center">
+                        <TextBlock Text="Heute" Style="{StaticResource Caption}" />
+                        <TextBlock Text="{Binding DayPnl}" Tag="{Binding DayPnlSign}" Style="{StaticResource SignedKpi}" FontSize="18" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Margin="24,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="Cash" Style="{StaticResource Caption}" />
+                        <TextBlock Text="{Binding Cash}" Style="{StaticResource KpiValue}" FontSize="18" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Hinweis: fehlende Dienste -->
+            <Border DockPanel.Dock="Top" Style="{StaticResource WarningBanner}" Margin="24,12,24,0"
+                    Visibility="{Binding MissingServicesText, Converter={StaticResource NullToVis}}">
+                <TextBlock Text="{Binding MissingServicesText}" TextWrapping="Wrap" Foreground="{DynamicResource App.Warning}" />
+            </Border>
+            <Border DockPanel.Dock="Top" Style="{StaticResource DangerBanner}" Margin="24,12,24,0"
+                    Visibility="{Binding Runtime.LastError, Converter={StaticResource NullToVis}}">
+                <TextBlock Text="{Binding Runtime.LastError}" TextWrapping="Wrap" Foreground="{DynamicResource App.Danger}" />
+            </Border>
+
+            <!-- Alle Seiten bleiben geladen (WebView2 im Chart soll nicht bei jedem Wechsel neu starten). -->
+            <Grid Margin="24,16,24,16">
+                <views:WatchlistView DataContext="{Binding Watchlist}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                <views:ChartView DataContext="{Binding Chart}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                <views:OrderTicketView DataContext="{Binding OrderTicket}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                <views:PortfolioView DataContext="{Binding Portfolio}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                <views:OrdersView DataContext="{Binding Orders}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                <views:AiActivityView DataContext="{Binding AiActivity}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                <views:SettingsView DataContext="{Binding Settings}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </DockPanel>
+
+        <!-- Statusleiste -->
+        <Border Grid.Column="1" Grid.Row="1" Background="{DynamicResource App.Surface}" BorderBrush="{DynamicResource App.Border}"
+                BorderThickness="0,1,0,0" Padding="24,6">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource Caption}" Margin="16,0,0,0">
+                        <Run Text="Laufzeit:" />
+                        <Run Text="{Binding Runtime.RuntimeStatus, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Caption}" Margin="16,0,0,0">
+                        <Run Text="MCP:" />
+                        <Run Text="{Binding Runtime.McpStatus, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding Connections}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:ConnectionItem}">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                                <Ellipse x:Name="Dot" Width="8" Height="8" Margin="0,0,6,0" Fill="{DynamicResource App.Warning}" VerticalAlignment="Center" />
+                                <TextBlock Style="{StaticResource Caption}">
+                                    <Run Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text="{Binding State, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsOk}" Value="True">
+                                    <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource App.Positive}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsProblem}" Value="True">
+                                    <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource App.Negative}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

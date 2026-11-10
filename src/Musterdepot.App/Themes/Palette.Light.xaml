@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Helle Palette: ruhige Grautöne, ein Akzent, klare Signalfarben. -->
+    <Color x:Key="App.AccentColor">#1E40AF</Color>
+    <SolidColorBrush x:Key="App.Background" Color="#F4F5F7" />
+    <SolidColorBrush x:Key="App.Surface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="App.SurfaceAlt" Color="#F0F2F5" />
+    <SolidColorBrush x:Key="App.Border" Color="#DDE1E6" />
+    <SolidColorBrush x:Key="App.Text" Color="#1B1F24" />
+    <SolidColorBrush x:Key="App.TextSecondary" Color="#5B6370" />
+    <SolidColorBrush x:Key="App.Accent" Color="#1E40AF" />
+    <SolidColorBrush x:Key="App.AccentSoft" Color="#E3E9FA" />
+    <SolidColorBrush x:Key="App.OnAccent" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="App.Positive" Color="#0B7A55" />
+    <SolidColorBrush x:Key="App.Negative" Color="#C62828" />
+    <SolidColorBrush x:Key="App.Warning" Color="#8A5300" />
+    <SolidColorBrush x:Key="App.WarningBackground" Color="#FFF1D6" />
+    <SolidColorBrush x:Key="App.WarningBorder" Color="#F0C36D" />
+    <SolidColorBrush x:Key="App.Info" Color="#1E40AF" />
+    <SolidColorBrush x:Key="App.InfoBackground" Color="#E8EEFB" />
+    <SolidColorBrush x:Key="App.Danger" Color="#D32F2F" />
+    <SolidColorBrush x:Key="App.DangerHover" Color="#B71C1C" />
+    <SolidColorBrush x:Key="App.DangerBackground" Color="#FDE7E7" />
+    <SolidColorBrush x:Key="App.OnDanger" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="App.NavBackground" Color="#EBEDF1" />
+    <SolidColorBrush x:Key="App.NavHover" Color="#DFE3E9" />
+    <SolidColorBrush x:Key="App.NavSelected" Color="#FFFFFF" />
+</ResourceDictionary>

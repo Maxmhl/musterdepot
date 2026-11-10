@@ -1,5 +1,14 @@
 <Application x:Class="Musterdepot.App.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Farbpalette wird vom ThemeService zur Laufzeit gegen Palette.Dark.xaml getauscht. -->
+                <ResourceDictionary Source="pack://application:,,,/Musterdepot;component/Themes/Palette.Light.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Musterdepot;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

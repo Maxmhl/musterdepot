@@ -5,13 +5,43 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>Musterdepot.App</RootNamespace>
     <AssemblyName>Musterdepot</AssemblyName>
+    <StartupObject>Musterdepot.App.Program</StartupObject>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WPF0001: ThemeMode/Fluent-Theme ist in .NET 10 noch als experimentell markiert. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+    <SatelliteResourceLanguages>de;en</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <!-- Eigenes Program.Main (Velopack zuerst, Single-Instance, Generic Host): App.xaml erzeugt kein Main. -->
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../Musterdepot.Core/Musterdepot.Core.csproj" />
+    <ProjectReference Include="../Musterdepot.Charting/Musterdepot.Charting.csproj" />
     <ProjectReference Include="../Musterdepot.Engine/Musterdepot.Engine.csproj" />
     <ProjectReference Include="../Musterdepot.MarketData/Musterdepot.MarketData.csproj" />
     <ProjectReference Include="../Musterdepot.Persistence/Musterdepot.Persistence.csproj" />
     <ProjectReference Include="../Musterdepot.Commands/Musterdepot.Commands.csproj" />
     <ProjectReference Include="../Musterdepot.Mcp/Musterdepot.Mcp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Velopack" Version="1.2.161" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+    <PackageReference Include="ScottPlot.WPF" Version="5.1.59" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <Content Include="Assets\Chart\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
