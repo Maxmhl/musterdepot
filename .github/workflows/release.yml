@@ -70,7 +70,13 @@ jobs:
       - name: Velopack (vpk) installieren
         shell: pwsh
         run: |
-          if ($env:VPK_VERSION) { dotnet tool install -g vpk --version $env:VPK_VERSION } else { dotnet tool install -g vpk }
+          # Standard: dieselbe Version wie das Velopack-NuGet-Paket der App.
+          if (-not $env:VPK_VERSION) {
+            [xml]$proj = Get-Content src/Musterdepot.App/Musterdepot.App.csproj
+            $env:VPK_VERSION = ($proj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -eq 'Velopack' }).Version
+          }
+          Write-Host "vpk $env:VPK_VERSION"
+          dotnet tool install -g vpk --version $env:VPK_VERSION
         env:
           VPK_VERSION: ${{ vars.VPK_VERSION }}
 
@@ -110,6 +116,7 @@ jobs:
       # Optional: Claude-Desktop-Erweiterung (.mcpb), sobald WS3b das Manifest angelegt hat.
       - name: .mcpb-Erweiterung bauen und anhängen
         if: github.ref_type == 'tag' && hashFiles('src/Musterdepot.McpBridge/mcpb/manifest.json') != ''
+        continue-on-error: true
         shell: pwsh
         run: |
           ./build/mcpb/pack-mcpb.ps1 -Version $env:VERSION -OutputDir artifacts/mcpb
