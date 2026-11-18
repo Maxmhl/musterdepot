@@ -153,9 +153,14 @@ public sealed class BridgePipeServer : IAsyncDisposable
     {
         using var identity = WindowsIdentity.GetCurrent();
         var user = identity.User ?? throw new InvalidOperationException("SID des aktuellen Benutzers unbekannt.");
+        // Clients mit PipeOptions.CurrentUserOnly vergleichen den Pipe-Besitzer mit WindowsIdentity.Owner
+        // (Standardbesitzer des Tokens). Bei Konten mit Adminrechten ist das BUILTIN\Administratoren, nicht der Benutzer.
+        var owner = identity.Owner ?? user;
         var security = new PipeSecurity();
-        security.SetOwner(user);
+        security.SetOwner(owner);
         security.AddAccessRule(new PipeAccessRule(user, PipeAccessRights.FullControl, AccessControlType.Allow));
+        if (owner != user)
+            security.AddAccessRule(new PipeAccessRule(owner, PipeAccessRights.FullControl, AccessControlType.Allow));
         security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.NetworkSid, null), PipeAccessRights.FullControl, AccessControlType.Deny));
         return NamedPipeServerStreamAcl.Create(name, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances,
             PipeTransmissionMode.Byte, PipeOptions.Asynchronous, 0, 0, security);
