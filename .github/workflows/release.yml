@@ -7,9 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version ohne v (nur Testlauf: es wird nichts hochgeladen)'
+        description: 'Version ohne v, z. B. 0.1.0'
         required: true
         default: '0.0.0-test'
+      publish:
+        description: 'GitHub Release (mit Tag v<Version> auf diesem Commit) veröffentlichen'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -40,6 +44,10 @@ jobs:
           if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw "Ungültige Version '$version' (SemVer erwartet)" }
           "VERSION=$version" >> $env:GITHUB_ENV
           "PRERELEASE=$([bool]($version -match '-'))" >> $env:GITHUB_ENV
+          $tag = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { "v$version" }
+          "RELEASE_TAG=$tag" >> $env:GITHUB_ENV
+          $publish = ($env:GITHUB_REF_TYPE -eq 'tag') -or ('${{ github.event.inputs.publish }}' -eq 'true')
+          "PUBLISH=$publish" >> $env:GITHUB_ENV
 
       - name: Tests
         run: dotnet test Musterdepot.slnx --configuration Release
@@ -82,7 +90,7 @@ jobs:
 
       # Vorherige Version holen, damit vpk Delta-Updates erzeugen kann (beim ersten Release gibt es keine).
       - name: Vorherige Version laden
-        if: github.ref_type == 'tag'
+        if: env.PUBLISH == 'True'
         continue-on-error: true
         run: >
           vpk download github --repoUrl ${{ github.server_url }}/${{ github.repository }}
@@ -102,24 +110,24 @@ jobs:
           path: ${{ env.RELEASE_DIR }}/*
 
       - name: GitHub Release veröffentlichen
-        if: github.ref_type == 'tag'
+        if: env.PUBLISH == 'True'
         shell: pwsh
         run: |
           $vpkArgs = @('upload', 'github',
             '--repoUrl', '${{ github.server_url }}/${{ github.repository }}',
             '--channel', $env:CHANNEL, '--outputDir', $env:RELEASE_DIR,
-            '--tag', $env:GITHUB_REF_NAME, '--releaseName', "Musterdepot $env:VERSION",
+            '--tag', $env:RELEASE_TAG, '--targetCommitish', $env:GITHUB_SHA, '--releaseName', "Musterdepot $env:VERSION",
             '--publish', '--token', '${{ secrets.GITHUB_TOKEN }}')
           if ($env:PRERELEASE -eq 'True') { $vpkArgs += '--pre' }
           vpk @vpkArgs
 
       # Optional: Claude-Desktop-Erweiterung (.mcpb), sobald WS3b das Manifest angelegt hat.
       - name: .mcpb-Erweiterung bauen und anhängen
-        if: github.ref_type == 'tag' && hashFiles('src/Musterdepot.McpBridge/mcpb/manifest.json') != ''
+        if: env.PUBLISH == 'True' && hashFiles('src/Musterdepot.McpBridge/mcpb/manifest.json') != ''
         continue-on-error: true
         shell: pwsh
         run: |
           ./build/mcpb/pack-mcpb.ps1 -Version $env:VERSION -OutputDir artifacts/mcpb
-          gh release upload $env:GITHUB_REF_NAME (Get-ChildItem artifacts/mcpb/*.mcpb).FullName --clobber
+          gh release upload $env:RELEASE_TAG (Get-ChildItem artifacts/mcpb/*.mcpb).FullName --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
